@@ -1,0 +1,25 @@
+<html>
+    {{>header}}
+    <body>
+        <div style="width:40%;margin:auto;">
+            <h1 class="text-center">MNNIT FORUM</h1>
+        </div>
+        <div class="text-center container" style="margin-top: 50px">
+        {{#if hack}}
+            I guess you were trying something fishy. If not contact Admin. If yes then nice try. Do contact me if you are successful.
+        {{/if}}
+
+        {{#if emailTaken}}
+            Sorry, but it looks like the email is already taken. Try <a href="#">resetting password</a> or contact the Admin at admin@hello.com
+        {{/if}}
+
+        {{#if success}}
+
+            <script>
+                window.setTimeout(function(){ window.location = "/home"; },3000);
+            </script>
+            Your account has been created. You are being redirected to the homepage.
+        {{/if}}
+        </div>
+    </body>
+</html>
