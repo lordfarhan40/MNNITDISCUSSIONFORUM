@@ -1,55 +1,62 @@
 const mongoose=require('./mongoose.js');
 
+const SECRET=1;
+const PRIVATE=2;
+const OPEN=3;
+
+
 const threadModule=mongoose.model("threads",{
-    name:{
+    subject:{
         type:String,
         required:true,
     },
-    description:{
+    threadBy:{
         type:String,
+        required:true
+    },
+    threadCategory:{
+        type:String,
+        required:true
+    },
+    subscriptionModel:{
+        type:Number,
+        required:true
+    },
+    sticky:{
+        type:Boolean,
         required:true
     }
 });
 
-function getCategoryById(_id,callback){
-    categoryModule.findById(_id,(err,category)=>
+function getThreadById(_id,callback){
+    threadModule.findById(_id,(err,category)=>
     {
-        if(err)
-            return callback(1);
-        callback(undefined,category);
-    });
-}
-
-function getCategoryByName(name,callback){
-    categoryModule.findOne({name},(err,category)=>
-    {
-        if(err)
-            return calback(1);
-        callback(undefined,category);
+        callback(err,category);
     });
 }
 
 
-function addCategory(name,description,callback){
-        var newCategory=new categoryModule({
-            name,
-            description
+function addThread(subject,threadBy,threadCategory,subscriptionModel,callback){
+        var newThread=new threadModule({
+            subject,
+            threadBy,
+            threadCategory,
+            subscriptionModel,
+            sticky:false
         });
-        newCategory.save((err)=>{
-            callback(err);
+        newThread.save((err,thread)=>{
+            callback(err,thread);
         });
 };
 
-function getCategoryList(callback){
-    categoryModule.find({},(err,categories)=>
-    {
+function getThreadsByCategory(categoryId,callback){
+    threadModule.find({threadCategory:categoryId},(err,categories)=>{
         callback(err,categories);
     });
 }
 
 module.exports={
-    getCategoryById,
-    getCategoryByName,
-    addCategory,
-    getCategoryList
+    getThreadById,
+    getThreadsByCategory,
+    addThread
 }

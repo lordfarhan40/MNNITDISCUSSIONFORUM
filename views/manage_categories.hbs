@@ -3,16 +3,20 @@
     <body>
         {{>nav_user}}
         <div class="container">
+            <h3 class="text-center">Manage Categories</h3>
             <a class="btn btn-block btn-info" href="/edit_category">Add new category</a>
             <table class="table table-striped" align="center" style="margin-top:20px">
                 
                 {{#each categories}}
                 <tr>
                     <td>{{this.name}}</td>
+                    <td>{{this.count}} threads</td>
                     <td class="text-center"><a title="Edit details of this category" href="/edit_category?_id={{this._id}}" ><span class="glyphicon glyphicon-edit" aria-hidden="true"></a></span></td>
                     <td class="text-center"><a title="Remove all the threads in this category" href="#"><span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span></td></a>
                     <td class="text-center"><a title="Delete this category" href="#"><span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span></td></a>
                 </tr>
+                {{else}}
+                    <tr class="text-center"><td>Sorry but there are no categories. Click the button above to add a few.</td></tr>
                 {{/each}}
             </table>
         </div>

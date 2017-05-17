@@ -1,0 +1,41 @@
+<html>
+    {{>header}}
+    <body>
+        {{>nav_user}}
+        <div style="width:60%;margin:auto">
+            <h3 class="text-center">Add a new thread</h3>
+            <form method="POST" action="/createThread_admin">
+                <div class="form-group">
+                    <label for="subject">Subject of the new thread: </label>
+                    <input type="text" class="form-control" id="subject" placeholder="Enter the subject for the thread" name="subject" required/>
+                </div>
+                <div class="form-group">
+                    <label for="category">Select the category: </label>
+                    <select class="form-control" id="category" name="category" required/>
+                    <option value="" disabled selected required>Select your option</option>
+                    {{#each categories}}
+                        <option value="{{this._id}}">{{this.name}}</option>
+                    {{/each}}
+                    <select>
+                </div>
+                <label>Select the level of privacy</label>
+                <div class="well">
+                    <div class="radio">
+                    <label><input type="radio" name="subscriptionModel" value="3" required><b>Open: </b>Anyone can view and post in the thread.</label>
+                    </div>
+                    <div class="radio">
+                    <label><input type="radio" name="subscriptionModel" value="2" required><b>Private: </b>Anyone can view but only subscribed members can post in the thread.</label>
+                    </div>
+                    <div class="radio">
+                    <label><input type="radio" name="subscriptionModel" value="1" required><b>Secret: </b>Only subscribed members can view and post in the thread.</label>
+                    </div>
+                </div>
+                <div>
+                    <label>Description oabout the thread (this will be the first post in the thread)</label>
+                    <textarea class="form-control" rows="10" id="post" placeholder="Enter the description of the thread" name="post" required></textarea>
+                </div>
+                <button class="btn btn-info btn-block" style="margin-top:10px">Create new thread</button>
+            </form>
+        </div>
+    </body>
+</html>

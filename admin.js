@@ -2,72 +2,36 @@ const validator=require('./helper/validator.js');
 const userModel=require('./model/userModel.js');
 const hasher=require('./helper/hasher.js');
 const categoriesModel=require('./model/categoriesModel.js');
-
+const sessionPassport=require('./helper/sessionPassport.js');
+const postModel=require('./model/postModel.js');
+const threadModel=require('./model/threadModel.js');
 
 const brand="MNNIT DISCUSSION FORUM";
 
-
-function adminSessionPassport(req,res,next){
-    console.log(req.session);
-    if(!req.session._id)
-    {
-        return res.redirect("/");
-    }
-
-    userModel.getUserById(req.session._id,(err,user)=>
-    {
-        if(err||!user)
-        {
-            return req.session.destroy(()=>
-            {
-                return res.redirect("/");
-            });
-        }
-
-        if(user.level==1)
-            return next(req,res,user);
-        
-        if(user.level==0)
-            return res.redirect("/home");
-        
-        return req.session.destroy(()=>
-        {
-            return res.redirect("/");
-        });
-    });
-}
 
 function setUpRoutes(app){
 
 app.get("/home_admin",(req,res)=>
 {
-    adminSessionPassport(req,res,(req,res,user)=>
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
-        res.render("home.hbs",{
-            pageTitle:"home",
-            name:user.name,
-            brand,
-            admin:true
-        })
+        hbsParams.pageTitle="Home";
+        res.render("home.hbs",hbsParams);
     });
 });
 
 app.get("/manage_categories",(req,res)=>
 {
-    adminSessionPassport(req,res,(req,res,user)=>
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
         categoriesModel.getCategoryList((err,categories)=>{
             if(err)
             {
                 return res.send("Sorry error occured, try contacting admin.");
             }
-            res.render("manage_categories.hbs",{
-                pageTitle:"Manage Categories",
-                name:user.name,
-                brand,
-                admin:true,
-                categories
-            });
+            hbsParams.pageTitle="Manage Categories";
+            hbsParams.categories=categories;
+            res.render("manage_categories.hbs",hbsParams);
         });
     });
 }); 
@@ -75,42 +39,28 @@ app.get("/manage_categories",(req,res)=>
 
 app.get("/edit_category",(req,res)=>
 {
-    adminSessionPassport(req,res,(req,res,user)=>{
-        console.log(req.query);
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
         if(req.query._id){
-            console.log("I got called");
             categoriesModel.getCategoryById(req.query._id,(err,category)=>
             {
-                var name=category.name;
-                var description=category.description;
-                var _id=category._id;
-                    res.render("edit_category.hbs",{
-                    pageTitle:"Manage Categories",
-                    name:user.name,
-                    brand,
-                    admin:true,
-                    categoryName:name,
-                    description,
-                    _id,
-                    edit:true
-                });
+                hbsParams.pageTitle="Manage Categories";
+                hbsParams.categoryName=category.name;
+                hbsParams.description=category.description;
+                hbsParams._id=category._id;
+                hbsParams.edit=true;
+                res.render("edit_category.hbs",hbsParams);
             });
         }
         else{
-            res.render("edit_category.hbs",{
-                    pageTitle:"Manage Categories",
-                    name:user.name,
-                    brand,
-                    admin:true,
-            });
+            hbsParams.pageTitle="Manage Categories";
+            res.render("edit_category.hbs",hbsParams);
         }
     });
 });
 
 app.post("/edit_category",(req,res)=>
 {
-    adminSessionPassport(req,res,(req,res,user)=>{
-        console.log(req.body);
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
         if(req.body._id){
             categoriesModel.editCategory(req.body._id,req.body.name,req.body.description,(err,category)=>
             {
@@ -127,7 +77,6 @@ app.post("/edit_category",(req,res)=>
             categoriesModel.addCategory(req.body.name,req.body.description,(err,category)=>{
                 if(err)
                 {
-                    console.log(err);
                     return res.send("Error occured");
                 }else
                 {
@@ -138,10 +87,51 @@ app.post("/edit_category",(req,res)=>
     });
 });
 
+app.get("/createThread_admin",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
+         categoriesModel.getCategoryList((err,categories)=>
+         {
+            if(err||!categories){
+                return res.send("Sorry but no categories are added");
+            }
+            hbsParams.categories=categories;
+            res.render("addThread.hbs",hbsParams);
+         });
+         
+    });
+});
 
-}
+app.post("/createThread_admin",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
+        var curThread=req.body
+        threadModel.addThread(curThread.subject,user._id,curThread.category,parseInt(curThread.subscriptionModel),(err,thread)=>
+        {
+            if(err||!thread)
+            {
+                console.log(err);
+                return res.send("Thread creation error");
+            }
+            categoriesModel.incrementCounter(curThread.category,1,(err,category)=>
+            {
+                if(err||!category){
+                    console.log(err,category);
+                }
+                postModel.addPost(curThread.post,user._id,thread._id,(err,post)=>
+                {
+                    if(err||!post)
+                    {
+                        return res.send("Post creation failed");
+                    }
+                    return res.redirect("/home_admin")
+                });
+            });
+        });
+    });
+});
 
-
+};
 
 module.exports={
     setUpRoutes
