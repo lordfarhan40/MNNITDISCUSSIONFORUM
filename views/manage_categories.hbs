@@ -3,6 +3,24 @@
     <body>
         {{>nav_user}}
         <div class="container">
+            {{#if nonemptyError}}
+                <div class="alert alert-success alert-danger" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        The category you wanted to delete is not empty. Please empty it before deletion.
+                </div>
+            {{/if}}
+            {{#if cleanupSuccess}}
+                <div class="alert alert-success alert-success" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        All the threads in the category have been successfully deleted.
+                </div>                
+            {{/if}}
+            {{#if deleteSuccess}}
+                <div class="alert alert-success alert-success" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        The category has been successfully deleted.
+                </div>                
+            {{/if}}
             <h3 class="text-center">Manage Categories</h3>
             <a class="btn btn-block btn-info" href="/edit_category">Add new category</a>
             <table class="table table-striped" align="center" style="margin-top:20px">
@@ -12,8 +30,8 @@
                     <td>{{this.name}}</td>
                     <td>{{this.count}} threads</td>
                     <td class="text-center"><a title="Edit details of this category" href="/edit_category?_id={{this._id}}" ><span class="glyphicon glyphicon-edit" aria-hidden="true"></a></span></td>
-                    <td class="text-center"><a title="Remove all the threads in this category" href="#"><span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span></td></a>
-                    <td class="text-center"><a title="Delete this category" href="#"><span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span></td></a>
+                    <td class="text-center"><a title="Remove all the threads in this category" href="/empty_category?_id={{this._id}}"><span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span></td></a>
+                    <td class="text-center"><a title="Delete this category" href="/delete_category?_id={{this._id}}"><span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span></td></a>
                 </tr>
                 {{else}}
                     <tr class="text-center"><td>Sorry but there are no categories. Click the button above to add a few.</td></tr>

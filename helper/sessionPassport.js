@@ -51,8 +51,12 @@ function userSessionPassport(req,res,next){
             });
         }
 
-        if(user.level==0)
-            return next(req,res,user);
+        if(user.level==0){
+            var hbsParams=new Object();
+            hbsParams.brand=brand;
+            hbsParams.name=user.name;
+            return next(req,res,user,hbsParams);
+        }
 
         if(user.level==1)
             return res.redirect("/home_admin");

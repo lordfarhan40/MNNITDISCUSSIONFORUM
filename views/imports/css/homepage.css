@@ -1,0 +1,11 @@
+.container a:hover{
+    text-decoration: none;
+}
+
+a div{
+    transition: background 1s;
+}
+
+a div:hover{
+    background: #bdc3c7;
+}

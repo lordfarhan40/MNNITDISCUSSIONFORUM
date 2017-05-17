@@ -63,11 +63,26 @@ function getCategoryList(callback){
     });
 }
 
+function deleteCategory(_id,callback){
+    categoryModule.remove({_id},(err)=>
+    {
+        callback(err);
+    });
+}
+
+function resetCount(_id,callback){
+    categoryModule.findOneAndUpdate({_id},{$set:{count:0}},(err,category)=>{
+        callback(err,category);
+    })
+}
+
 module.exports={
     getCategoryById,
     getCategoryByName,
     addCategory,
     getCategoryList,
     editCategory,
-    incrementCounter
+    incrementCounter,
+    deleteCategory,
+    resetCount
 }

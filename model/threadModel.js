@@ -55,8 +55,15 @@ function getThreadsByCategory(categoryId,callback){
     });
 }
 
+function deleteAllThreadInCategory(_id,callback){
+    threadModule.remove({threadCategory:_id},(err)=>{
+        return callback(err);
+    });
+}
+
 module.exports={
     getThreadById,
     getThreadsByCategory,
-    addThread
+    addThread,
+    deleteAllThreadInCategory
 }

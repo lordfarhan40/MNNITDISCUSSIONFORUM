@@ -16,7 +16,11 @@ app.get("/home_admin",(req,res)=>
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
         hbsParams.pageTitle="Home";
-        res.render("home.hbs",hbsParams);
+        categoriesModel.getCategoryList((err,categories)=>
+        {
+            hbsParams.categories=categories;
+            res.render("home.hbs",hbsParams);
+        })
     });
 });
 
@@ -24,6 +28,20 @@ app.get("/manage_categories",(req,res)=>
 {
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
+        if(req.query.message){
+            if(req.query.message==1)
+            {
+                hbsParams.nonemptyError=true;
+            }
+            if(req.query.message==2)
+            {
+                hbsParams.cleanupSuccess=true;
+            }
+            if(req.query.message==3)
+            {
+                hbsParams.deleteSuccess=true;
+            }
+        }
         categoriesModel.getCategoryList((err,categories)=>{
             if(err)
             {
@@ -96,6 +114,7 @@ app.get("/createThread_admin",(req,res)=>
                 return res.send("Sorry but no categories are added");
             }
             hbsParams.categories=categories;
+            hbsParams.pageTitle="Craete thread";
             res.render("addThread.hbs",hbsParams);
          });
          
@@ -126,6 +145,34 @@ app.post("/createThread_admin",(req,res)=>
                     }
                     return res.redirect("/home_admin")
                 });
+            });
+        });
+    });
+});
+
+app.get("/delete_category",(req,res)=>{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
+        threadModel.getThreadsByCategory(req.query._id,(err,threads)=>
+        {
+            if(threads.length>0){
+                return res.redirect("/manage_categories?message=1");
+            }
+            categoriesModel.deleteCategory(req.query._id,(err)=>
+            {
+                if(err) return res.send("Error in deleting category");
+                return res.redirect("/manage_categories?message=3")
+            });
+        });
+    });
+});
+
+app.get("/empty_category",(req,res)=>{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
+        threadModel.deleteAllThreadInCategory(req.query._id,(err)=>{
+            if(err) return res.send("There was some error in emptying the category");
+            categoriesModel.resetCount(req.query._id,(err,category)=>
+            {
+                return res.redirect("/manage_categories?message=2");
             });
         });
     });

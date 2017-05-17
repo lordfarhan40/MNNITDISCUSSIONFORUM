@@ -1,26 +1,17 @@
 const validator=require('./helper/validator.js');
 const userModel=require('./model/userModel.js');
-const hasher=require('./helper/hasher.js');
 const sessionPassport=require('./helper/sessionPassport.js');
 
 const brand="MNNIT DISCUSSION FORUM";
-
-
-
-
-
 
 function setUpRoutes(app){
 
 app.get("/home",(req,res)=>
 {
-    sessionPassport.userSessionPassport(req,res,(req,res,user)=>
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
-        res.render("home.hbs",{
-            pageTitle:"home",
-            name:user.name,
-            brand,
-        })
+        hbsParams.pageTitle="Home";
+        res.render("home.hbs",hbsParams);
     });
 });
 
@@ -33,71 +24,13 @@ app.get("/logout",(req,res)=>
     });
 });
 
-app.get("/login",(req,res)=>
-{
 
-    res.render("lands.hbs",{
-        pageTitle:"MNNIT DISCUSSION FORUM",
-        error:req.query.error
+app.get("/createThread",(req,res)=>{
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        hbsParams.pageTitle="Create thread";
+        res.render("addThread.hbs",hbsParams);
     });
-});
-
-
-app.post("/login",(req,res)=>
-{
-    var curuser=req.body;
-    userModel.getUserByEmail(curuser.email,(err,user)=>
-    {
-        if(err||!user)
-        {
-            return res.redirect("/login?error=1");;
-        }
-        hasher.compare(curuser.password,user.password,(err,answer)=>
-        {
-            if(!answer){
-                return res.redirect("/login?error=1");
-            }
-            req.session._id=user._id;
-            return res.redirect("/home");
-        });
-    })
-});
-
-app.post("/signup",(req,res)=>
-{
-    var userDetail=req.body;
-    if(!validator.validateDetails(userDetail))
-    {
-        return res.render("post_signup.hbs",{
-            pageTitle:"Signup error",
-            hack:true
-        });
-    }
-
-    userModel.getUserByEmail(userDetail.email,(err,user)=>
-    {
-        if(err||user)
-        {
-            return res.render("post_signup.hbs",{
-                pageTitle:"Signup error",
-                emailTaken:true
-            });
-        }
-
-        hasher.generateHash(userDetail.password,(err,str)=>
-        {
-            userDetail.password=str;
-            userModel.addNewUser(userDetail,(err,addedUser)=>
-            {
-                req.session._id=addedUser._id;
-                res.render("post_signup.hbs",{
-                    pageTitle:"Signup successfull",
-                    success:true
-                });
-            });
-        });
-    });
-    
 });
 
 }

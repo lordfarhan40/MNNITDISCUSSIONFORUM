@@ -1,6 +1,21 @@
 <html>
     {{>header}}
     <body>
+        <link rel="stylesheet" href="/css/homepage.css"/>
         {{>nav_user}}
+        <div class="container text-center">
+            <h3 class="text-center">Welcome to MNNIT OFFICIAL DISCUSSION FORUM</h3>
+            <hr>
+            <div>
+            {{#each categories}}
+            <a href="/category?id={{this._id}}">
+                <div class="container well">
+                    <h4><strong>{{this.name}}</strong></h4>
+                    {{this.description}}
+                </div>
+            </a>
+            {{/each}}
+            </div>
+        </div>
     </body>
 </html>
