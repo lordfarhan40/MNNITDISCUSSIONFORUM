@@ -12,8 +12,8 @@
                         <col width="20%">
                         {{#each threads}}
                         <tr>
-                            <td style="padding:10px"><a href="#"><h4>{{this.subject}}</h4></a></td>
-                            <td style="padding:10px"><strong>Thread by:</strong> {{this.threadBy}}&nbsp;&nbsp;<br> <strong>Replies: </strong>{{this.count}}</td>
+                            <td style="padding:10px"><a href="#" style="font-size: 23px">{{this.subject}}</a><br><strong>Thread by:</strong> {{this.threadBy.name}}</td>
+                            <td style="padding:10px"><strong>Replies: </strong>{{this.count}}</td>
                         </tr>
                         {{else}}
                         <tr>

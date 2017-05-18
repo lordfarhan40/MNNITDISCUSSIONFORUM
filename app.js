@@ -30,32 +30,6 @@ const threadModel=require('./model/threadModel.js');
 
 //end import statements
 
-function replaceThreadBy(thread,callback){
-    userModel.getUserById(thread.threadBy,(err,user)=>
-    {
-        thread.threadBy=user.name;
-        callback();
-    });
-}
-
-function threadInitUserNames(threads,callback){
-    if(threads.length==0){
-        return callback();
-    }
-    var count=0;
-    for(var i=0;i<threads.length;++i)
-    {
-        replaceThreadBy(threads[i],()=>{
-            ++count;
-            if(count==threads.length){
-                callback();
-            }
-        });
-    }
-}
-
-
-
 //setting up express for use
 
 const app=express();
@@ -197,14 +171,11 @@ app.get("/category",(req,res)=>
             
             hbsParams.catName=category.name;
             hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,curPage,"category");
-
-            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,(err,threads)=>
+            console.log("i get here");
+            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,"threadBy",(err,threads)=>
             {
-                threadInitUserNames(threads,()=>
-                {
-                    hbsParams.threads=threads;
-                    res.render("category.hbs",hbsParams);
-                });
+                hbsParams.threads=threads;
+                res.render("category.hbs",hbsParams);
             });
         });
     });

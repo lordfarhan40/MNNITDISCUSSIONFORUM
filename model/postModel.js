@@ -7,12 +7,14 @@ var schema=mongoose.Schema({
         required:true,
     },
     postBy:{
-        type:String,
-        required:true
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        ref:'users'
     },
     postThread:{
-        type:String,
-        required:true
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        ref:'threads'
     }
 });
 
@@ -20,9 +22,8 @@ schema.plugin(mongoosePaginate);
 
 const postModule=mongoose.model("post",schema);
 
-function getPostById(_id,callback){
-    postModule.findById(_id,(err,post)=>
-    {
+function getPostById(_id,populate,callback){
+    postModule.findById(_id).populate(populate).exec((err,post)=>{
         return callback(err,post);
     });
 }
@@ -39,8 +40,8 @@ function addPost(content,postBy,postThread,callback){
     });
 }
 
-function getPostsByThread(_id,callback){
-    postModule.find({postThread:_id},(err,posts)=>
+function getPostsByThread(_id,populate,callback){
+    postModule.find({postThread:_id}).populate(populate).exec((err,posts)=>
     {
         callback(err,posts);
     });
@@ -53,9 +54,17 @@ function deletePostById(_id,callback){
     });
 }
 
+function deletePostsByThread(_id,callback){
+    postModule.remove({postThread:_id},(err)=>
+    {
+        callback(err);
+    });
+}
+
 module.exports={
     getPostById,
     addPost,
     getPostsByThread,
-    deletePostById
+    deletePostById,
+    deletePostsByThread
 }

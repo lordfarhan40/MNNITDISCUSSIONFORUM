@@ -10,7 +10,7 @@ const brand="MNNIT DISCUSSION FORUM";
 // Now this is going to be a lon code to empty the category async
 
 function emptyCategory(_id,callback){
-    threadModel.getThreadsByCategory(_id,(err,threads)=>
+    threadModel.getThreadsByCategory(_id,"",(err,threads)=>
     {
         if(threads.length==0)
         {
@@ -19,6 +19,7 @@ function emptyCategory(_id,callback){
         var counter=0;
         for(var i=0;i<threads.length;++i)
         {
+
             deleteThreadSafely(threads[i]._id,()=>
             {
                 ++counter;
@@ -34,21 +35,12 @@ function emptyCategory(_id,callback){
 }
 
 function deleteThreadSafely(_id,callback){
-    postModel.getPostsByThread(_id,(err,posts)=>
+    postModel.deletePostsByThread(_id,(err)=>
     {
-        var counter=0;
-        for(var i=0;i<posts.length;++i)
+        return threadModel.deleteThreadById(_id,()=>
         {
-            postModel.deletePostById(posts[i]._id,()=>{
-                ++counter;
-                if(counter==posts.length){
-                    return threadModel.deleteThreadById(_id,()=>
-                    {
-                        return callback();
-                    });
-                }
-            });
-        }
+            return callback();
+        });
     });
 }
 
@@ -141,7 +133,7 @@ app.post("/edit_category",(req,res)=>
 
 app.get("/delete_category",(req,res)=>{
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
-        threadModel.getThreadsByCategory(req.query._id,(err,threads)=>
+        threadModel.getThreadsByCategory(req.query._id,"",(err,threads)=>
         {
             if(threads.length>0){
                 return res.redirect("/manage_categories?message=1");
