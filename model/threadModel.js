@@ -25,6 +25,10 @@ const threadModule=mongoose.model("threads",{
     sticky:{
         type:Boolean,
         required:true
+    },
+    count:{
+        type:Number,
+        required:true
     }
 });
 
@@ -42,7 +46,8 @@ function addThread(subject,threadBy,threadCategory,subscriptionModel,callback){
             threadBy,
             threadCategory,
             subscriptionModel,
-            sticky:false
+            sticky:false,
+            count:0
         });
         newThread.save((err,thread)=>{
             callback(err,thread);
@@ -58,6 +63,13 @@ function getThreadsByCategory(categoryId,callback){
 function deleteAllThreadInCategory(_id,callback){
     threadModule.remove({threadCategory:_id},(err)=>{
         return callback(err);
+    });
+}
+
+function incrementCounter(_id,amount,callback){
+    threadModule.findByIdAndUpdate(_id,{$inc:{count:amount}},(err,category)=>
+    {
+        return callback(err,category);
     });
 }
 

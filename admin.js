@@ -11,19 +11,6 @@ const brand="MNNIT DISCUSSION FORUM";
 
 function setUpRoutes(app){
 
-app.get("/home_admin",(req,res)=>
-{
-    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
-    {
-        hbsParams.pageTitle="Home";
-        categoriesModel.getCategoryList((err,categories)=>
-        {
-            hbsParams.categories=categories;
-            res.render("home.hbs",hbsParams);
-        })
-    });
-});
-
 app.get("/manage_categories",(req,res)=>
 {
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
@@ -102,51 +89,6 @@ app.post("/edit_category",(req,res)=>
                 }
             });
         }
-    });
-});
-
-app.get("/createThread_admin",(req,res)=>
-{
-    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
-         categoriesModel.getCategoryList((err,categories)=>
-         {
-            if(err||!categories){
-                return res.send("Sorry but no categories are added");
-            }
-            hbsParams.categories=categories;
-            hbsParams.pageTitle="Craete thread";
-            res.render("addThread.hbs",hbsParams);
-         });
-         
-    });
-});
-
-app.post("/createThread_admin",(req,res)=>
-{
-    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
-        var curThread=req.body
-        threadModel.addThread(curThread.subject,user._id,curThread.category,parseInt(curThread.subscriptionModel),(err,thread)=>
-        {
-            if(err||!thread)
-            {
-                console.log(err);
-                return res.send("Thread creation error");
-            }
-            categoriesModel.incrementCounter(curThread.category,1,(err,category)=>
-            {
-                if(err||!category){
-                    console.log(err,category);
-                }
-                postModel.addPost(curThread.post,user._id,thread._id,(err,post)=>
-                {
-                    if(err||!post)
-                    {
-                        return res.send("Post creation failed");
-                    }
-                    return res.redirect("/home_admin")
-                });
-            });
-        });
     });
 });
 

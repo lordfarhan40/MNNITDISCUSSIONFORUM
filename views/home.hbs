@@ -2,7 +2,11 @@
     {{>header}}
     <body>
         <link rel="stylesheet" href="/css/homepage.css"/>
+        {{#if name}}
         {{>nav_user}}
+        {{else}}
+        {{>nav_guest}}
+        {{/if}}
         <div class="container text-center">
             <h3 class="text-center">Welcome to MNNIT OFFICIAL DISCUSSION FORUM</h3>
             <hr>

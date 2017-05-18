@@ -1,3 +1,16 @@
+//////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                          //
+//      Welcome to the source code. Happy Reading                                           //
+//                                                                                          //
+//      app.js : contains all the routes that dont require session                          //
+//                                                                                          //        
+//      admin.js : contains all the routes that require admin level session                 //          
+//                                                                                          //
+//      user.js : contains all the routes that require user level session                   //
+//                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
 //importing stuff for use
 
 const express=require('express');
@@ -9,6 +22,8 @@ const user=require("./user.js");
 const admin=require("./admin.js");
 const userModel=require("./model/userModel.js");
 const hasher=require('./helper/hasher.js');
+const categoriesModel=require('./model/categoriesModel.js');
+const sessionPassport=require('./helper/sessionPassport.js');
 
 //end import statements
 
@@ -48,7 +63,8 @@ app.get("/logout",(req,res)=>
 
 app.get("/login",(req,res)=>
 {
-
+    if(req.session._id)
+        return res.redirect("/");
     res.render("lands.hbs",{
         pageTitle:"MNNIT DISCUSSION FORUM",
         error:req.query.error
@@ -58,6 +74,8 @@ app.get("/login",(req,res)=>
 
 app.post("/login",(req,res)=>
 {
+    if(req.session._id)
+        return res.redirect("/");
     var curuser=req.body;
     userModel.getUserByEmail(curuser.email,(err,user)=>
     {
@@ -71,18 +89,20 @@ app.post("/login",(req,res)=>
                 return res.redirect("/login?error=1");
             }
             req.session._id=user._id;
-            return res.redirect("/home");
+            return res.redirect("/");
         });
     })
 });
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-//                  Function for signup
+//     Function that creates a new user
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 app.post("/signup",(req,res)=>
 {
+    if(req.session._id)
+        return res.redirect("/");
     var userDetail=req.body;
     if(!validator.validateDetails(userDetail))
     {
@@ -123,15 +143,15 @@ app.post("/signup",(req,res)=>
 
 app.get("/",(req,res)=>
 {
-    if(!req.session._id){
-        res.render("index.hbs",{
-            pageTitle:brand,
-            brand     
-        });
-    }else
+    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
-        res.redirect("/home");
-    }
+        categoriesModel.getCategoryList((err,categories)=>
+        {
+            hbsParams.categories=categories;
+            hbsParams.pageTitle="Home";
+            res.render("home.hbs",hbsParams);
+        });
+    });
 });
 
 mongoose.connectDB(()=>
