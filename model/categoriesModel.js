@@ -1,6 +1,7 @@
 const mongoose=require('./mongoose.js');
+var mongoosePaginate = require('mongoose-paginate');
 
-const categoryModule=mongoose.model("categories",{
+var schema=mongoose.Schema({
     name:{
         type:String,
         required:true,
@@ -14,6 +15,10 @@ const categoryModule=mongoose.model("categories",{
         required:true
     }
 });
+
+schema.plugin(mongoosePaginate);
+
+const categoryModule=mongoose.model("categories",schema);
 
 function getCategoryById(_id,callback){
     categoryModule.findById(_id,(err,category)=>

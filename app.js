@@ -13,6 +13,7 @@
 
 //importing stuff for use
 
+const htmlGenerator=require("./helper/htmlGenerator.js");
 const validator=require('./helper/validator.js');
 const express=require('express');
 const hbs=require('hbs');
@@ -170,7 +171,7 @@ app.post("/signup",(req,res)=>
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //         Stuff from now on is common to all users so it requires passport method
-////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/",(req,res)=>
 {
@@ -189,13 +190,21 @@ app.get("/category",(req,res)=>
 {
     sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
-        var curThread=req.query._id;
-        threadModel.getThreadsByCategory(curThread,(err,threads)=>
-        {
-            threadInitUserNames(threads,()=>
+        var curCat=req.query._id;
+        var curPage=req.query.page||1;
+
+        categoriesModel.getCategoryById(curCat,(err,category)=>{
+            
+            hbsParams.catName=category.name;
+            hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,curPage,"category");
+
+            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,(err,threads)=>
             {
-                hbsParams.threads=threads;
-                res.render("category.hbs",hbsParams);
+                threadInitUserNames(threads,()=>
+                {
+                    hbsParams.threads=threads;
+                    res.render("category.hbs",hbsParams);
+                });
             });
         });
     });

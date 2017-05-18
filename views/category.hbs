@@ -2,12 +2,27 @@
     {{>header}}
     <body>
         {{>nav}}
-        <h3>{{catName}}</h3>
-        {{#each threads}}
-            <div>
-                <h4>{{this.subject}}</h4>
-                <strong>Thread by:</strong> {{this.threadBy}}&nbsp;&nbsp;<strong>Replies: </strong>{{this.count}}
+        <h3 class="text-center">{{catName}}</h3>
+        <div class="row">
+            <div class="col-lg-offset-1 col-lg-10 col-md-10 col-md-offset-1 col-sm-12 col-xs-12">
+                {{{pagination}}}
+                <div class="panel panel-default">
+                    <table class="table table-bordered">
+                        <col width="40%">
+                        <col width="20%">
+                        {{#each threads}}
+                        <tr>
+                            <td style="padding:10px"><a href="#"><h4>{{this.subject}}</h4></a></td>
+                            <td style="padding:10px"><strong>Thread by:</strong> {{this.threadBy}}&nbsp;&nbsp;<br> <strong>Replies: </strong>{{this.count}}</td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td class="text-center">Sorry but there are no threads in this category. Be the first one to add new</td>
+                        </tr>
+                        {{/each}}
+                    </table>
+                </div>
             </div>
-        {{/each}}
+        </div>
     </body>
 </html>

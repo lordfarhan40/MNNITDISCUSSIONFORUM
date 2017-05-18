@@ -1,6 +1,7 @@
 const mongoose=require('./mongoose.js');
+var mongoosePaginate = require('mongoose-paginate');
 
-const userModule=mongoose.model("users",{
+var schema=new mongoose.Schema({
     email:{
         type:String,
         required:true
@@ -24,8 +25,11 @@ const userModule=mongoose.model("users",{
         type:Date,
         required:true
     }
-
 });
+
+schema.plugin(mongoosePaginate);
+
+const userModule=mongoose.model("users",schema);
 
 function getUserById(_id,callback){
     userModule.findById(_id,(err,user)=>

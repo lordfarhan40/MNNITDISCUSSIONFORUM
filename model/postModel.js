@@ -1,6 +1,7 @@
 const mongoose=require('./mongoose.js');
+var mongoosePaginate = require('mongoose-paginate');
 
-const postModule=mongoose.model("post",{
+var schema=mongoose.Schema({
     content:{
         type:String,
         required:true,
@@ -14,6 +15,10 @@ const postModule=mongoose.model("post",{
         required:true
     }
 });
+
+schema.plugin(mongoosePaginate);
+
+const postModule=mongoose.model("post",schema);
 
 function getPostById(_id,callback){
     postModule.findById(_id,(err,post)=>

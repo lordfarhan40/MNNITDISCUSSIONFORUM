@@ -1,11 +1,11 @@
 const mongoose=require('./mongoose.js');
+var mongoosePaginate = require('mongoose-paginate');
 
 const SECRET=1;
 const PRIVATE=2;
 const OPEN=3;
 
-
-const threadModule=mongoose.model("threads",{
+var schema=mongoose.Schema({
     subject:{
         type:String,
         required:true,
@@ -31,6 +31,10 @@ const threadModule=mongoose.model("threads",{
         required:true
     }
 });
+
+schema.plugin(mongoosePaginate);
+
+const threadModule=mongoose.model("threads",schema);
 
 function getThreadById(_id,callback){
     threadModule.findById(_id,(err,category)=>
@@ -60,6 +64,13 @@ function getThreadsByCategory(categoryId,callback){
     });
 }
 
+function getThreadsByCategoryPaginate(categoryId,limit,pageNo,callback){
+    threadModule.paginate({threadCategory:categoryId},{limit,page:pageNo},(err,result)=>
+    {
+        callback(err,result.docs);
+    });
+}
+
 function deleteThreadById(_id,callback){
     threadModule.remove({_id},(err)=>{
         return callback(err);
@@ -78,5 +89,6 @@ module.exports={
     getThreadsByCategory,
     addThread,
     deleteThreadById,
-    incrementCounter
+    incrementCounter,
+    getThreadsByCategoryPaginate
 }
