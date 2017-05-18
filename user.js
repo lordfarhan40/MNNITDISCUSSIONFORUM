@@ -67,6 +67,17 @@ app.post("/createThread",(req,res)=>
     });
 });
 
+app.post("/post_reply",(req,res)=>
+{
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        createNewPost(req.body.content,user._id,req.body._id,(err,post)=>
+        {
+            res.redirect("/thread?_id="+req.body._id);
+        });
+    });
+});
+
 }
 
 module.exports={

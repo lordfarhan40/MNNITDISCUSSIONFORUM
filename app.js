@@ -10,7 +10,6 @@
 //                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-
 //importing stuff for use
 
 const htmlGenerator=require("./helper/htmlGenerator.js");
@@ -27,34 +26,58 @@ const hasher=require('./helper/hasher.js');
 const categoriesModel=require('./model/categoriesModel.js');
 const sessionPassport=require('./helper/sessionPassport.js');
 const threadModel=require('./model/threadModel.js');
-
+const postModel=require('./model/postModel.js');
 //end import statements
 
 //setting up express for use
-
 const app=express();
 const cookieKey="HelloFromTheOtherSide";
-
 app.use(expressSession({secret:cookieKey}));
-
-
 app.set('view engine','hbs');
 hbs.registerPartials(__dirname+"/views/partials/");
-
 app.use(express.static(__dirname+'/views/imports'));
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
-
 //end setup express
-
-
 
 user.setUpRoutes(app);
 admin.setUpRoutes(app);
 
-const brand="MNNIT DISCUSSION FORUM";
+/////////////////////////////////////////////////////////////
+//       Helpers functions that are local to the file
+/////////////////////////////////////////////////////////////
+
+function setThreadsLatestPost(threads,callback){
+    var counter=0;
+    for(var i=0;i<threads.length;++i){
+        setThreadLatestPost(threads[i]._id,(err)=>
+        {
+            ++counter;
+            if(counter==threads.length)
+            {
+                callback();
+            }
+        });
+    }
+}
+
+function setThreadLatestPost(thread,callback){
+    postModel.getPostsByThread(thread,"",-1,(err,posts)=>
+    {
+        thread.lastPost=posts[0];
+        callback(err);
+    });
+}
+
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+hbs.registerHelper('dateFormat',(date,options)=>{
+    var ret="";
+    ret=date.toDateString()+" "+date.toLocaleTimeString();
+    return ret;
+});
+
 
 app.get("/logout",(req,res)=>
 {
@@ -73,7 +96,6 @@ app.get("/login",(req,res)=>
         error:req.query.error
     });
 });
-
 
 app.post("/login",(req,res)=>
 {
@@ -96,7 +118,6 @@ app.post("/login",(req,res)=>
         });
     })
 });
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //     Function that creates a new user
@@ -160,6 +181,27 @@ app.get("/",(req,res)=>
     });
 });
 
+app.get("/thread",(req,res)=>
+{
+    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var curThread=req.query._id;
+        hbsParams._id=curThread;
+        categoriesModel.getCategoryById
+        threadModel.getThreadById(curThread,(err,thread)=>
+        {   
+            hbsParams.threadName=thread.subject;
+            hbsParams.pageTitle=thread.subject;
+
+            postModel.getPostsByThread(thread._id,"postBy",1,(err,posts)=>
+            {
+                hbsParams.posts=posts;
+                res.render("thread.hbs",hbsParams);
+            });
+        });
+    });
+});
+
 app.get("/category",(req,res)=>
 {
     sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
@@ -171,11 +213,16 @@ app.get("/category",(req,res)=>
             
             hbsParams.catName=category.name;
             hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,curPage,"category");
-            console.log("i get here");
-            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,"threadBy",(err,threads)=>
+            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,"threadBy",-1,(err,threads)=>
             {
-                hbsParams.threads=threads;
-                res.render("category.hbs",hbsParams);
+                setThreadsLatestPost(threads,()=>
+                {
+                    threads.sort(function(a,b){
+                        return b-a;
+                    });
+                    hbsParams.threads=threads;
+                    res.render("category.hbs",hbsParams);
+                });
             });
         });
     });

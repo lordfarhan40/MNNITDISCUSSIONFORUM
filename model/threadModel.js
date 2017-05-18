@@ -31,6 +31,10 @@ var schema=mongoose.Schema({
     count:{
         type:Number,
         required:true
+    },
+    date:{
+        type:Date,
+        required:true,
     }
 });
 
@@ -38,10 +42,10 @@ schema.plugin(mongoosePaginate);
 
 const threadModule=mongoose.model("threads",schema);
 
-function getThreadById(_id,populate,callback){
-    threadModule.findById(_id).populate(populate).exec((err,thread)=>
+function getThreadById(_id,callback){
+    threadModule.findById(_id).exec((err,thread)=>
     {
-        return callback(err,category);
+        return callback(err,thread);
     });
 }
 
@@ -53,23 +57,23 @@ function addThread(subject,threadBy,threadCategory,subscriptionModel,callback){
             threadCategory,
             subscriptionModel,
             sticky:false,
-            count:0
+            count:0,
+            date:new Date(),
         });
         newThread.save((err,thread)=>{
             callback(err,thread);
         });
 };
 
-function getThreadsByCategory(categoryId,populate,callback){
-    threadModule.find({threadCategory:categoryId}).populate(populate).exec((err,threads)=>
+function getThreadsByCategory(categoryId,populate,sort,callback){
+    threadModule.find({threadCategory:categoryId}).populate(populate).sort({date:sort}).exec((err,threads)=>
     {
         return callback(err,categories);
     });
 }
 
-function getThreadsByCategoryPaginate(categoryId,limit,pageNo,populate,callback){
-    console.log(populate);
-    threadModule.paginate({threadCategory:categoryId},{limit,populate,page:pageNo},(err,result)=>
+function getThreadsByCategoryPaginate(categoryId,limit,pageNo,populate,sort,callback){
+    threadModule.paginate({threadCategory:categoryId},{limit,sort:{date:sort},populate,page:pageNo},(err,result)=>
     {
         callback(err,result.docs);
     });

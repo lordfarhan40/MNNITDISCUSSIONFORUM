@@ -15,6 +15,10 @@ var schema=mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         required:true,
         ref:'threads'
+    },
+    date:{
+        type:Date,
+        required:true,
     }
 });
 
@@ -32,7 +36,8 @@ function addPost(content,postBy,postThread,callback){
     var newPost=new postModule({
         content,
         postBy,
-        postThread
+        postThread,
+        date:new Date(),
     });
     newPost.save((err,post)=>
     {
@@ -40,8 +45,8 @@ function addPost(content,postBy,postThread,callback){
     });
 }
 
-function getPostsByThread(_id,populate,callback){
-    postModule.find({postThread:_id}).populate(populate).exec((err,posts)=>
+function getPostsByThread(_id,populate,sort,callback){
+    postModule.find({postThread:_id}).populate(populate).sort({date:sort}).exec((err,posts)=>
     {
         callback(err,posts);
     });
