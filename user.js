@@ -46,10 +46,10 @@ app.get("/createThread",(req,res)=>
          categoriesModel.getCategoryList((err,categories)=>
          {
             if(err||!categories){
-                return res.send("Sorry but no categories are added");
+                return res.render("error_page.hbs",{error});
             }
             hbsParams.categories=categories;
-            hbsParams.pageTitle="Craete thread";
+            hbsParams.pageTitle="Create thread";
             res.render("addThread.hbs",hbsParams);
          });
          

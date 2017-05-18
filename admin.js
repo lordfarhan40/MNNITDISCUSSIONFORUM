@@ -7,6 +7,8 @@ const threadModel=require('./model/threadModel.js');
 
 const brand="MNNIT DISCUSSION FORUM";
 
+const error="Occured occured, try contacting admin of the website at mohdfarhanmnnit@gmail.com.";
+
 // Now this is going to be a lon code to empty the category async
 
 function emptyCategory(_id,callback){
@@ -14,19 +16,20 @@ function emptyCategory(_id,callback){
     {
         if(threads.length==0)
         {
-            return callback();
+            return callback(undefined);
         }
         var counter=0;
         for(var i=0;i<threads.length;++i)
         {
-
-            deleteThreadSafely(threads[i]._id,()=>
+            deleteThreadSafely(threads[i]._id,(err)=>
             {
+                if(err)
+                    callback(err);
                 ++counter;
                 if(counter==threads.length){
-                    categoriesModel.resetCount(_id,()=>
+                    categoriesModel.resetCount(_id,(err)=>
                     {
-                        callback();
+                        callback(err);
                     });
                 }
             });
@@ -37,9 +40,11 @@ function emptyCategory(_id,callback){
 function deleteThreadSafely(_id,callback){
     postModel.deletePostsByThread(_id,(err)=>
     {
-        return threadModel.deleteThreadById(_id,()=>
+        if(err)
+            callback(err);
+        return threadModel.deleteThreadById(_id,(err)=>
         {
-            return callback();
+            return callback(err);
         });
     });
 }
@@ -71,7 +76,7 @@ app.get("/manage_categories",(req,res)=>
         categoriesModel.getCategoryList((err,categories)=>{
             if(err)
             {
-                return res.send("Sorry error occured, try contacting admin.");
+                return res.render("error_page.hbs",{error});
             }
             hbsParams.pageTitle="Manage Categories";
             hbsParams.categories=categories;
@@ -87,6 +92,8 @@ app.get("/edit_category",(req,res)=>
         if(req.query._id){
             categoriesModel.getCategoryById(req.query._id,(err,category)=>
             {
+                if(err||!category)
+                    return res.render("error_page.hbs",{error});
                 hbsParams.pageTitle="Manage Categories";
                 hbsParams.categoryName=category.name;
                 hbsParams.description=category.description;
@@ -110,7 +117,7 @@ app.post("/edit_category",(req,res)=>
             {
                 if(err)
                 {
-                    return res.send("Error occured");
+                    return res.render("error_page.hbs",{error});
                 }else
                 {
                     return res.redirect("/manage_categories");
@@ -121,7 +128,7 @@ app.post("/edit_category",(req,res)=>
             categoriesModel.addCategory(req.body.name,req.body.description,(err,category)=>{
                 if(err)
                 {
-                    return res.send("Error occured");
+                    return res.render("error_page.hbs",{error});
                 }else
                 {
                     return res.redirect("/manage_categories");
@@ -135,12 +142,16 @@ app.get("/delete_category",(req,res)=>{
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
         threadModel.getThreadsByCategory(req.query._id,"",-1,(err,threads)=>
         {
+            if(err||!threads)
+            {
+                return res.render("error_page.hbs",{error});
+            }
             if(threads.length>0){
                 return res.redirect("/manage_categories?message=1");
             }
             categoriesModel.deleteCategory(req.query._id,(err)=>
             {
-                if(err) return res.send("Error in deleting category");
+                if(err) return res.render("error_page.hbs",{error});
                 return res.redirect("/manage_categories?message=3")
             });
         });
@@ -149,8 +160,11 @@ app.get("/delete_category",(req,res)=>{
 
 app.get("/empty_category",(req,res)=>{
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
-        emptyCategory(req.query._id,()=>
+        emptyCategory(req.query._id,(err)=>
         {
+                if(err){
+                    return res.render("error_page.hbs",{error});
+                }
                 return res.redirect("/manage_categories?message=2");
         });
     });

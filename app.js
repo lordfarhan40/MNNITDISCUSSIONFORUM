@@ -43,19 +43,27 @@ app.use(bodyParser.urlencoded({extended:true}));
 user.setUpRoutes(app);
 admin.setUpRoutes(app);
 
+const error="Occured occured, try contacting admin of the website at mohdfarhanmnnit@gmail.com.";
+
 /////////////////////////////////////////////////////////////
 //       Helpers functions that are local to the file
 /////////////////////////////////////////////////////////////
 
 function setThreadsLatestPost(threads,callback){
     var counter=0;
+    if(threads.length==0)
+    {
+        callback(undefined);
+    }
     for(var i=0;i<threads.length;++i){
         setThreadLatestPost(threads[i]._id,(err)=>
         {
+            if(err)
+                return callback(err);
             ++counter;
             if(counter==threads.length)
             {
-                callback();
+                callback(undefined);
             }
         });
     }
@@ -183,23 +191,24 @@ app.get("/",(req,res)=>
 
 app.get("/thread",(req,res)=>
 {
-    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
-    {
-        var curThread=req.query._id;
-        hbsParams._id=curThread;
-        categoriesModel.getCategoryById
-        threadModel.getThreadById(curThread,(err,thread)=>
-        {   
-            hbsParams.threadName=thread.subject;
-            hbsParams.pageTitle=thread.subject;
-
-            postModel.getPostsByThread(thread._id,"postBy",1,(err,posts)=>
-            {
-                hbsParams.posts=posts;
-                res.render("thread.hbs",hbsParams);
+        sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
+        {
+            var curThread=req.query._id;
+            hbsParams._id=curThread;
+            categoriesModel.getCategoryById
+            threadModel.getThreadById(curThread,(err,thread)=>
+            {   
+                if(err||!thread)
+                    return res.render("error_page.hbs",{error});
+                hbsParams.threadName=thread.subject;
+                hbsParams.pageTitle=thread.subject;
+                postModel.getPostsByThread(thread._id,"postBy",1,(err,posts)=>
+                {
+                    hbsParams.posts=posts;
+                    res.render("thread.hbs",hbsParams);
+                });
             });
         });
-    });
 });
 
 app.get("/category",(req,res)=>
@@ -210,7 +219,8 @@ app.get("/category",(req,res)=>
         var curPage=req.query.page||1;
 
         categoriesModel.getCategoryById(curCat,(err,category)=>{
-            
+            if(err||!category)
+                return res.render("error_page.hbs",{error});
             hbsParams.catName=category.name;
             hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,curPage,"category");
             threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,"threadBy",-1,(err,threads)=>

@@ -68,7 +68,7 @@ function addThread(subject,threadBy,threadCategory,subscriptionModel,callback){
 function getThreadsByCategory(categoryId,populate,sort,callback){
     threadModule.find({threadCategory:categoryId}).populate(populate).sort({date:sort}).exec((err,threads)=>
     {
-        return callback(err,categories);
+        return callback(err,threads);
     });
 }
 
