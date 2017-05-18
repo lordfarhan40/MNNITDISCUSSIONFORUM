@@ -13,6 +13,7 @@
 
 //importing stuff for use
 
+const validator=require('./helper/validator.js');
 const express=require('express');
 const hbs=require('hbs');
 const bodyParser=require('body-parser');
@@ -24,8 +25,34 @@ const userModel=require("./model/userModel.js");
 const hasher=require('./helper/hasher.js');
 const categoriesModel=require('./model/categoriesModel.js');
 const sessionPassport=require('./helper/sessionPassport.js');
+const threadModel=require('./model/threadModel.js');
 
 //end import statements
+
+function replaceThreadBy(thread,callback){
+    userModel.getUserById(thread.threadBy,(err,user)=>
+    {
+        thread.threadBy=user.name;
+        callback();
+    });
+}
+
+function threadInitUserNames(threads,callback){
+    if(threads.length==0){
+        return callback();
+    }
+    var count=0;
+    for(var i=0;i<threads.length;++i)
+    {
+        replaceThreadBy(threads[i],()=>{
+            ++count;
+            if(count==threads.length){
+                callback();
+            }
+        });
+    }
+}
+
 
 
 //setting up express for use
@@ -46,6 +73,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 //end setup express
+
 
 
 user.setUpRoutes(app);
@@ -140,6 +168,9 @@ app.post("/signup",(req,res)=>
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+//         Stuff from now on is common to all users so it requires passport method
+////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/",(req,res)=>
 {
@@ -153,6 +184,23 @@ app.get("/",(req,res)=>
         });
     });
 });
+
+app.get("/category",(req,res)=>
+{
+    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var curThread=req.query._id;
+        threadModel.getThreadsByCategory(curThread,(err,threads)=>
+        {
+            threadInitUserNames(threads,()=>
+            {
+                hbsParams.threads=threads;
+                res.render("category.hbs",hbsParams);
+            });
+        });
+    });
+});
+
 
 mongoose.connectDB(()=>
 {

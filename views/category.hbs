@@ -1,0 +1,13 @@
+<html>
+    {{>header}}
+    <body>
+        {{>nav}}
+        <h3>{{catName}}</h3>
+        {{#each threads}}
+            <div>
+                <h4>{{this.subject}}</h4>
+                <strong>Thread by:</strong> {{this.threadBy}}&nbsp;&nbsp;<strong>Replies: </strong>{{this.count}}
+            </div>
+        {{/each}}
+    </body>
+</html>

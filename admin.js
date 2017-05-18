@@ -1,4 +1,3 @@
-const validator=require('./helper/validator.js');
 const userModel=require('./model/userModel.js');
 const hasher=require('./helper/hasher.js');
 const categoriesModel=require('./model/categoriesModel.js');
@@ -8,6 +7,54 @@ const threadModel=require('./model/threadModel.js');
 
 const brand="MNNIT DISCUSSION FORUM";
 
+// Now this is going to be a lon code to empty the category async
+
+function emptyCategory(_id,callback){
+    threadModel.getThreadsByCategory(_id,(err,threads)=>
+    {
+        if(threads.length==0)
+        {
+            return callback();
+        }
+        var counter=0;
+        for(var i=0;i<threads.length;++i)
+        {
+            deleteThreadSafely(threads[i]._id,()=>
+            {
+                ++counter;
+                if(counter==threads.length){
+                    categoriesModel.resetCount(_id,()=>
+                    {
+                        callback();
+                    });
+                }
+            });
+        }
+    });
+}
+
+function deleteThreadSafely(_id,callback){
+    postModel.getPostsByThread(_id,(err,posts)=>
+    {
+        var counter=0;
+        for(var i=0;i<posts.length;++i)
+        {
+            postModel.deletePostById(posts[i]._id,()=>{
+                ++counter;
+                if(counter==posts.length){
+                    return threadModel.deleteThreadById(_id,()=>
+                    {
+                        return callback();
+                    });
+                }
+            });
+        }
+    });
+}
+
+
+
+// End of the long code
 
 function setUpRoutes(app){
 
@@ -110,12 +157,9 @@ app.get("/delete_category",(req,res)=>{
 
 app.get("/empty_category",(req,res)=>{
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
-        threadModel.deleteAllThreadInCategory(req.query._id,(err)=>{
-            if(err) return res.send("There was some error in emptying the category");
-            categoriesModel.resetCount(req.query._id,(err,category)=>
-            {
+        emptyCategory(req.query._id,()=>
+        {
                 return res.redirect("/manage_categories?message=2");
-            });
         });
     });
 });

@@ -34,7 +34,23 @@ function addPost(content,postBy,postThread,callback){
     });
 }
 
+function getPostsByThread(_id,callback){
+    postModule.find({postThread:_id},(err,posts)=>
+    {
+        callback(err,posts);
+    });
+}
+
+function deletePostById(_id,callback){
+    postModule.remove({_id},(err)=>
+    {
+        callback(err);
+    });
+}
+
 module.exports={
     getPostById,
-    addPost
+    addPost,
+    getPostsByThread,
+    deletePostById
 }

@@ -7,6 +7,28 @@ const postModel=require('./model/postModel.js');
 
 const brand="MNNIT DISCUSSION FORUM";
 
+function createNewPost(content,postBy,postThread,callback){
+    postModel.addPost(content,postBy,postThread,(err,post)=>
+    {
+        threadModel.incrementCounter(postThread,1,()=>{
+            callback(post);
+        });
+    });
+}
+
+function createNewThread(subject,content,threadBy,subscriptionModel,category,callback){
+    threadModel.addThread(subject,threadBy,category,subscriptionModel,(err,thread)=>
+    {
+        categoriesModel.incrementCounter(category,1,()=>
+        {
+            createNewPost(content,threadBy,thread._id,()=>{
+                callback(thread);
+            });
+        });
+    });
+}
+
+
 function setUpRoutes(app){
 
 app.get("/logout",(req,res)=>
@@ -37,29 +59,11 @@ app.get("/createThread",(req,res)=>
 app.post("/createThread",(req,res)=>
 {
     sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>{
-        var curThread=req.body
-        threadModel.addThread(curThread.subject,user._id,curThread.category,parseInt(curThread.subscriptionModel),(err,thread)=>
+        var curThread=req.body;
+        createNewThread(curThread.subject,curThread.post,user._id,parseInt(curThread.subscriptionModel),curThread.category,()=>
         {
-            if(err||!thread)
-            {
-                console.log(err);
-                return res.send("Thread creation error");
-            }
-            categoriesModel.incrementCounter(curThread.category,1,(err,category)=>
-            {
-                if(err||!category){
-                    console.log(err,category);
-                }
-                postModel.addPost(curThread.post,user._id,thread._id,(err,post)=>
-                {
-                    if(err||!post)
-                    {
-                        return res.send("Post creation failed");
-                    }
-                    return res.redirect("/")
-                });
-            });
-        });
+            res.redirect("/");
+        })
     });
 });
 

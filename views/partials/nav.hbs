@@ -1,0 +1,38 @@
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">{{brand}}</a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        {{#if name}}
+          {{#if admin}}
+            <li><a href="#">Manage Users</a></li>
+            <li><a href="/manage_categories">Manage Categories</a></li>
+          {{/if}}
+          <li>
+            <a href="/createThread">Create Thread</a>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Hi, {{name}}<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Edit subscription</a></li>
+              <li><a href="#">Account Settings</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="/logout">Logout</a></li>
+            </ul>
+          </li>
+        {{else}}
+        <li><a href="/login">Login/Signup</a></li>
+        {{/if}}
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
