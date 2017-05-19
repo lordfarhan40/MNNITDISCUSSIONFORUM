@@ -4,15 +4,25 @@
         {{>nav}}
         <div class="container">
             <div class="row">
-                <div class="col-lg-10 col-md-10">
+                <div class="col-lg-8 col-md-8">
                     <h3>{{threadName}}<h3>
                 </div>
                 {{#if name}}
+                    {{#if threadOP}}
+                    <div class="col-lg-2 col-md-2">
+                        <a style="margin-top:15px" class="btn btn-info btn-block" href="#">Manage Subscriptions</a>
+                    </div>                
+                    {{else}}
+                    <div class="col-lg-2 col-md-2">
+                        <a style="margin-top:15px" class="btn btn-info btn-block" href="#">Subscribe</a>
+                    </div>
+                    {{/if}}
                 <div class="col-lg-2 col-md-2">
                     <a style="margin-top:15px" class="btn btn-info btn-block" href="#" data-toggle="modal" data-target="#myModal">Post Reply</a>
                 </div>
                 {{/if}}
             </div>
+            {{{paginate}}}
             {{#each posts}}
             <div class="well">
                 <h4><strong>{{this.postBy.name}}</strong></h4>

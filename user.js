@@ -5,7 +5,9 @@ const categoriesModel=require('./model/categoriesModel.js');
 const threadModel=require('./model/threadModel.js');
 const postModel=require('./model/postModel.js');
 
-const brand="MNNIT DISCUSSION FORUM";
+/////////////////////////////////////////////////////////////
+//       Helpers functions that are local to the file
+/////////////////////////////////////////////////////////////
 
 function createNewPost(content,postBy,postThread,callback){
     postModel.addPost(content,postBy,postThread,(err,post)=>
@@ -28,6 +30,8 @@ function createNewThread(subject,content,threadBy,subscriptionModel,category,cal
     });
 }
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 function setUpRoutes(app){
 

@@ -11,7 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 //importing stuff for use
-
 const htmlGenerator=require("./helper/htmlGenerator.js");
 const validator=require('./helper/validator.js');
 const express=require('express');
@@ -40,9 +39,22 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 //end setup express
 
+//calling setUpRoutes for user and admin stuff
 user.setUpRoutes(app);
 admin.setUpRoutes(app);
 
+/////////////////////////////////////////////////////////////
+//  Handlebars registerting helper
+/////////////////////////////////////////////////////////////
+hbs.registerHelper('dateFormat',(date,options)=>{
+    var ret="";
+    ret=date.toDateString()+" "+date.toLocaleTimeString();
+    return ret;
+});
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+//constant declarations
 const error="Occured occured, try contacting admin of the website at mohdfarhanmnnit@gmail.com.";
 
 /////////////////////////////////////////////////////////////
@@ -56,7 +68,7 @@ function setThreadsLatestPost(threads,callback){
         callback(undefined);
     }
     for(var i=0;i<threads.length;++i){
-        setThreadLatestPost(threads[i]._id,(err)=>
+        setThreadLatestPost(threads[i],(err)=>
         {
             if(err)
                 return callback(err);
@@ -70,7 +82,7 @@ function setThreadsLatestPost(threads,callback){
 }
 
 function setThreadLatestPost(thread,callback){
-    postModel.getPostsByThread(thread,"",-1,(err,posts)=>
+    postModel.getPostsByThread(thread._id,"postBy",-1,(err,posts)=>
     {
         thread.lastPost=posts[0];
         callback(err);
@@ -80,12 +92,9 @@ function setThreadLatestPost(thread,callback){
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
-hbs.registerHelper('dateFormat',(date,options)=>{
-    var ret="";
-    ret=date.toDateString()+" "+date.toLocaleTimeString();
-    return ret;
-});
-
+/////////////////////////////////////////////////////////////
+//  Registering routes for common action
+/////////////////////////////////////////////////////////////
 
 app.get("/logout",(req,res)=>
 {
@@ -97,72 +106,69 @@ app.get("/logout",(req,res)=>
 
 app.get("/login",(req,res)=>
 {
-    if(req.session._id)
-        return res.redirect("/");
-    res.render("lands.hbs",{
+    sessionPassport.noUserAllowed(req,res,(req,res)=>
+    {
+        res.render("lands.hbs",{
         pageTitle:"MNNIT DISCUSSION FORUM",
         error:req.query.error
+        });    
     });
 });
 
 app.post("/login",(req,res)=>
 {
-    if(req.session._id)
-        return res.redirect("/");
-    var curuser=req.body;
-    userModel.getUserByEmail(curuser.email,(err,user)=>
+    sessionPassport.noUserAllowed(req,res,(req,res)=>
     {
-        if(err||!user)
+        var curuser=req.body;
+        userModel.getUserByEmail(curuser.email,(err,user)=>
         {
-            return res.redirect("/login?error=1");;
-        }
-        hasher.compare(curuser.password,user.password,(err,answer)=>
-        {
-            if(!answer){
-                return res.redirect("/login?error=1");
+            if(err||!user)
+            {
+                return res.redirect("/login?error=1");;
             }
-            req.session._id=user._id;
-            return res.redirect("/");
+            hasher.compare(curuser.password,user.password,(err,answer)=>
+            {
+                if(!answer){
+                    return res.redirect("/login?error=1");
+                }
+                req.session._id=user._id;
+                return res.redirect("/");
+            });
         });
-    })
+    });
 });
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-//     Function that creates a new user
-//////////////////////////////////////////////////////////////////////////////////////////////
 
 app.post("/signup",(req,res)=>
 {
-    if(req.session._id)
-        return res.redirect("/");
-    var userDetail=req.body;
-    if(!validator.validateDetails(userDetail))
+    sessionPassport.noUserAllowed(req,res,(req,res)=>
     {
-        return res.render("post_signup.hbs",{
-            pageTitle:"Signup error",
-            hack:true
-        });
-    }
-
-    userModel.getUserByEmail(userDetail.email,(err,user)=>
-    {
-        if(err||user)
+        var userDetail=req.body;
+        if(!validator.validateDetails(userDetail))
         {
             return res.render("post_signup.hbs",{
                 pageTitle:"Signup error",
-                emailTaken:true
+                hack:true
             });
         }
-
-        hasher.generateHash(userDetail.password,(err,str)=>
+        userModel.getUserByEmail(userDetail.email,(err,user)=>
         {
-            userDetail.password=str;
-            userModel.addNewUser(userDetail,(err,addedUser)=>
+            if(err||user)
             {
-                req.session._id=addedUser._id;
-                res.render("post_signup.hbs",{
-                    pageTitle:"Signup successfull",
-                    success:true
+                return res.render("post_signup.hbs",{
+                    pageTitle:"Signup error",
+                    emailTaken:true
+                });
+            }
+            hasher.generateHash(userDetail.password,(err,str)=>
+            {
+                userDetail.password=str;
+                userModel.addNewUser(userDetail,(err,addedUser)=>
+                {
+                    req.session._id=addedUser._id;
+                    res.render("post_signup.hbs",{
+                        pageTitle:"Signup successfull",
+                        success:true
+                    });
                 });
             });
         });
@@ -173,7 +179,7 @@ app.post("/signup",(req,res)=>
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-//         Stuff from now on is common to all users so it requires passport method
+//  Stuff from now on is common to all users so it requires passport method
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/",(req,res)=>
@@ -193,17 +199,20 @@ app.get("/thread",(req,res)=>
 {
         sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
         {
+            //get queries from the url
             var curThread=req.query._id;
-            hbsParams._id=curThread;
-            categoriesModel.getCategoryById
+            var curPage=req.query.page||1;
+            
             threadModel.getThreadById(curThread,(err,thread)=>
             {   
                 if(err||!thread)
                     return res.render("error_page.hbs",{error});
-                hbsParams.threadName=thread.subject;
-                hbsParams.pageTitle=thread.subject;
-                postModel.getPostsByThread(thread._id,"postBy",1,(err,posts)=>
+                postModel.getPostsByThreadPaginate(thread._id,10,curPage,"postBy",1,(err,posts)=>
                 {
+                    hbsParams._id=thread._id;
+                    hbsParams.paginate=htmlGenerator.generatePagination(curThread,thread.count,10,curPage,"thread");
+                    hbsParams.threadName=thread.subject;
+                    hbsParams.pageTitle=thread.subject;
                     hbsParams.posts=posts;
                     res.render("thread.hbs",hbsParams);
                 });
@@ -215,29 +224,28 @@ app.get("/category",(req,res)=>
 {
     sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
+        //get queries from the url
         var curCat=req.query._id;
         var curPage=req.query.page||1;
-
         categoriesModel.getCategoryById(curCat,(err,category)=>{
             if(err||!category)
                 return res.render("error_page.hbs",{error});
-            hbsParams.catName=category.name;
-            hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,curPage,"category");
             threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,"threadBy",-1,(err,threads)=>
             {
                 setThreadsLatestPost(threads,()=>
                 {
                     threads.sort(function(a,b){
-                        return b-a;
+                        return b.lastPost.date-a.lastPost.date;
                     });
+                    hbsParams.catName=category.name;
                     hbsParams.threads=threads;
+                    hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,15,curPage,"category");
                     res.render("category.hbs",hbsParams);
                 });
             });
         });
     });
 });
-
 
 mongoose.connectDB(()=>
 {

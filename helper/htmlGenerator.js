@@ -1,11 +1,13 @@
-const MAX=15;
+/////////////////////////////////////////////////////
+/// Function that generates paginated stuff
+/////////////////////////////////////////////////////
 
-function generatePagination(_id,threads,cur,target)
+function generatePagination(_id,count,limit,cur,target)
 {
-    if(threads<=MAX)
+    if(count<=limit)
         return "";
-    var pages=threads/MAX;
-    if(threads%MAX!=0)
+    var pages=count/limit;
+    if(count%limit!=0)
         ++pages;
     var html="<div class='text-center'><ul class='pagination'>";
     for(var i=1;i<=pages;++i)
@@ -15,9 +17,10 @@ function generatePagination(_id,threads,cur,target)
             html+=" class='active'";
         html+="><a href='"+target+"?_id="+_id+"&page="+i+"'>"+i+"</a></li>";
     }
-    html+="</ul>"
+    html+="</ul></div>"
     return html;
 }
+
 
 module.exports={
     generatePagination

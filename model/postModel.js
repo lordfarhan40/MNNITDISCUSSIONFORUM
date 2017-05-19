@@ -52,6 +52,13 @@ function getPostsByThread(_id,populate,sort,callback){
     });
 }
 
+function getPostsByThreadPaginate(threadId,limit,pageNo,populate,sort,callback){
+    postModule.paginate({postThread:threadId},{limit,sort:{date:sort},populate,page:pageNo},(err,result)=>
+    {
+        callback(err,result.docs);
+    });
+}
+
 function deletePostById(_id,callback){
     postModule.remove({_id},(err)=>
     {
@@ -71,5 +78,6 @@ module.exports={
     addPost,
     getPostsByThread,
     deletePostById,
-    deletePostsByThread
+    deletePostsByThread,
+    getPostsByThreadPaginate
 }

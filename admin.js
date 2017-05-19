@@ -9,7 +9,9 @@ const brand="MNNIT DISCUSSION FORUM";
 
 const error="Occured occured, try contacting admin of the website at mohdfarhanmnnit@gmail.com.";
 
-// Now this is going to be a lon code to empty the category async
+/////////////////////////////////////////////////////////////
+//       Helpers functions that are local to the file
+/////////////////////////////////////////////////////////////
 
 function emptyCategory(_id,callback){
     threadModel.getThreadsByCategory(_id,"",-1,(err,threads)=>
@@ -49,9 +51,8 @@ function deleteThreadSafely(_id,callback){
     });
 }
 
-
-
-// End of the long code
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 function setUpRoutes(app){
 

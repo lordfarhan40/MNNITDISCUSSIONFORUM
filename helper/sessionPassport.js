@@ -76,8 +76,17 @@ function userSessionPassport(req,res,next){
     });
 }
 
+function noUserAllowed(req,res,next){
+    if(req.session._id)
+    {
+        return res.redirect("/");
+    }
+    next(req,res);
+}
+
 module.exports={
     adminSessionPassport,
     userSessionPassport,
-    guestSessionPassport
+    guestSessionPassport,
+    noUserAllowed
 }
