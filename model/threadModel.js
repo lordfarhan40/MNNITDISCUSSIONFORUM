@@ -24,7 +24,7 @@ var schema=mongoose.Schema({
         type:Number,
         required:true
     },
-    sticky:{
+    pinned:{
         type:Boolean,
         required:true
     },
@@ -56,7 +56,7 @@ function addThread(subject,threadBy,threadCategory,subscriptionModel,callback){
             threadBy,
             threadCategory,
             subscriptionModel,
-            sticky:false,
+            pinned:false,
             count:0,
             date:new Date(),
         });
@@ -92,11 +92,23 @@ function incrementCounter(_id,amount,callback){
     });
 }
 
+function pinThread(_id,callback){
+    threadModule.findById({_id},(err,thread)=>
+    {
+        thread.pinned=!thread.pinned;
+        thread.save((err)=>
+        {
+            callback(err);
+        })
+    });
+}
+
 module.exports={
+    pinThread,
     getThreadById,
     getThreadsByCategory,
     addThread,
     deleteThreadById,
     incrementCounter,
-    getThreadsByCategoryPaginate
+    getThreadsByCategoryPaginate,
 }

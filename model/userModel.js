@@ -24,6 +24,10 @@ var schema=new mongoose.Schema({
     date:{
         type:Date,
         required:true
+    },
+    banned:{
+        type:Number,
+        required:true
     }
 });
 
@@ -44,6 +48,32 @@ function getUserByEmail(email,callback){
     });
 }
 
+function getUsers(callback){
+    userModule.find({},(err,users)=>
+    {
+        callback(err,users);
+    });
+}
+
+function flipBanById(_id,callback){
+    userModule.findById(_id,(err,user)=>
+    {
+        if(err||!user)
+            return callback(err||1);
+        user.banned=!user.banned;
+        user.save((err)=>
+        {
+            callback(err,user);
+        });
+    });
+}
+
+function changePasswordById(_id,password,callback){
+    userModule.findOneAndUpdate({_id},{$set:{password}},(err,user)=>
+    {
+        callback(err,user);
+    });
+} 
 
 const addNewUser=(userDetails,callback)=>{
             var newUser=new userModule({
@@ -52,6 +82,7 @@ const addNewUser=(userDetails,callback)=>{
                 mobile:userDetails.mobNo,
                 password:userDetails.password,
                 level:0,
+                banned:0,
                 date:new Date()
             });
             newUser.save((err,user)=>{
@@ -63,7 +94,10 @@ const addNewUser=(userDetails,callback)=>{
 module.exports={
     getUserById,
     getUserByEmail,
-    addNewUser
+    addNewUser,
+    getUsers,
+    flipBanById,
+    changePasswordById
 };
 
 

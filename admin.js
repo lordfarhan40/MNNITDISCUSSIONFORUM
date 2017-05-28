@@ -4,6 +4,7 @@ const categoriesModel=require('./model/categoriesModel.js');
 const sessionPassport=require('./helper/sessionPassport.js');
 const postModel=require('./model/postModel.js');
 const threadModel=require('./model/threadModel.js');
+const validator=require('./helper/validator.js');
 
 const brand="MNNIT DISCUSSION FORUM";
 
@@ -29,10 +30,7 @@ function emptyCategory(_id,callback){
                     callback(err);
                 ++counter;
                 if(counter==threads.length){
-                    categoriesModel.resetCount(_id,(err)=>
-                    {
-                        callback(err);
-                    });
+                    callback(err);
                 }
             });
         }
@@ -42,11 +40,15 @@ function emptyCategory(_id,callback){
 function deleteThreadSafely(_id,callback){
     postModel.deletePostsByThread(_id,(err)=>
     {
-        if(err)
-            callback(err);
-        return threadModel.deleteThreadById(_id,(err)=>
+        threadModel.getThreadById(_id,(err,thread)=>
         {
-            return callback(err);
+            categoriesModel.incrementCounter(thread.threadCategory,-1,(err)=>
+            {
+                threadModel.deleteThreadById(_id,(err)=>
+                {
+                    callback(err);
+                });
+            });
         });
     });
 }
@@ -168,6 +170,88 @@ app.get("/empty_category",(req,res)=>{
                 }
                 return res.redirect("/manage_categories?message=2");
         });
+    });
+});
+
+app.get("/manage_users",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        userModel.getUsers((err,users)=>
+        {
+            for(var i=0;i<users.length;++i)
+            {
+                if(users[i]._id==req.session._id)
+                {
+                    users[i].currentUser=true;
+                }
+            }
+            hbsParams.users=users;
+            res.render("manage_users.hbs",hbsParams);
+        });
+    });
+});
+
+app.get("/ban_user",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var _id=req.query._id;
+        userModel.flipBanById(_id,(err)=>
+        {
+            return res.redirect("/manage_users");
+        });
+    });
+});
+
+app.post("/change_password",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var _id=req.body._id;
+        var password=req.body.password;
+        if(validator.checkPassword(password)){
+            hasher.generateHash(password,(err,hash)=>
+            {
+                userModel.changePasswordById(_id,hash,(err,user)=>
+                {
+                    res.redirect('/manage_users');
+                });
+            });
+        }
+        
+    });
+});
+
+app.get("/delete_thread",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var _id=req.query._id;
+        deleteThreadSafely(_id,(err)=>
+        {
+            if(err){
+                console.log(err);
+                return res.redirect("error");
+            }
+            return res.redirect("/");
+        });
+    });
+});
+
+app.get("/pin_thread",(req,res)=>
+{
+    sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var _id=req.query._id;
+        threadModel.pinThread(_id,(err)=>{
+            if(err)
+            {
+                console.log(err);
+                return res.redirect("error found");
+            }
+            return res.redirect("/");
+        })
     });
 });
 

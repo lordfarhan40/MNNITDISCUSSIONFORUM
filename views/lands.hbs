@@ -14,7 +14,13 @@
                             {{#if error}}
                             <div class="alert alert-danger alert-dismissable">
                                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                                <strong>Error!</strong> Wrong username/password combination entered
+                                <strong>Error!</strong> Wrong username/password combination entered.
+                            </div>
+                            {{/if}}
+                            {{#if banned}}
+                            <div class="alert alert-danger alert-dismissable">
+                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                <strong>Error!</strong> Your account has been banned. Please contact admin.
                             </div>
                             {{/if}}
                             <form id="loginForm" method="POST" action="/login">

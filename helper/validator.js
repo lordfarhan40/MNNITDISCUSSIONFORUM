@@ -3,6 +3,10 @@ function validateEmail(email) {
     return re.test(email);
 }
 
+function checkPassword(password){
+    return !(password.trim().length==0);
+}
+
 function validateDetails(userDetail){
     if(!userDetail.name||!userDetail.password||!userDetail.email)
         return 0;
@@ -10,12 +14,15 @@ function validateDetails(userDetail){
     if(userDetail.name.trim().length==0)
         return 0;
 
-    if(userDetail.password.trim().length==0)
+    if(checkPassword(userDetail.password))
         return 0;
 
     return validateEmail(userDetail.email);
 }
 
+
+
 module.exports={
-    validateDetails
+    validateDetails,
+    checkPassword
 }

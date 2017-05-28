@@ -40,8 +40,10 @@ app.use(bodyParser.urlencoded({extended:true}));
 //end setup express
 
 //calling setUpRoutes for user and admin stuff
+
 user.setUpRoutes(app);
 admin.setUpRoutes(app);
+
 
 /////////////////////////////////////////////////////////////
 //  Handlebars registerting helper
@@ -89,6 +91,24 @@ function setThreadLatestPost(thread,callback){
     });
 }
 
+function addGravatarToPosts(posts){
+    for(var i=0;i<posts.length;++i)
+    {
+        addGravatar(posts[i],posts[i].postBy.email);
+    }
+}
+
+function addIndex(array,start){
+    for(var i=0;i<array.length;++i){
+        array[i].indexNo=start;
+        ++start;
+    }
+}
+
+function addGravatar(obj,email){
+    obj.gravatar=hasher.getmd5(email);
+}
+
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 
@@ -110,7 +130,8 @@ app.get("/login",(req,res)=>
     {
         res.render("lands.hbs",{
         pageTitle:"MNNIT DISCUSSION FORUM",
-        error:req.query.error
+        error:req.query.error,
+        banned:req.query.banned
         });    
     });
 });
@@ -130,6 +151,10 @@ app.post("/login",(req,res)=>
             {
                 if(!answer){
                     return res.redirect("/login?error=1");
+                }
+                if(user.banned==1)
+                {
+                    return res.redirect("/login?banned=1")
                 }
                 req.session._id=user._id;
                 return res.redirect("/");
@@ -195,6 +220,23 @@ app.get("/",(req,res)=>
     });
 });
 
+app.get("/post",(req,res)=>
+{
+    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var postID=req.query._id;
+        postModel.getPostById(postID,"postThread postBy",(err,post)=>
+        {
+            if(err||!post)
+            {
+                return res.render("error_page.hbs",{error});
+            }
+            hbsParams.curPost=post;
+            res.render("post.hbs",hbsParams);
+        });
+    });
+});
+
 app.get("/thread",(req,res)=>
 {
         sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
@@ -209,6 +251,8 @@ app.get("/thread",(req,res)=>
                     return res.render("error_page.hbs",{error});
                 postModel.getPostsByThreadPaginate(thread._id,10,curPage,"postBy",1,(err,posts)=>
                 {
+                    addIndex(posts,1+(curPage-1)*10);
+                    addGravatarToPosts(posts);
                     hbsParams._id=thread._id;
                     hbsParams.paginate=htmlGenerator.generatePagination(curThread,thread.count,10,curPage,"thread");
                     hbsParams.threadName=thread.subject;
@@ -235,6 +279,10 @@ app.get("/category",(req,res)=>
                 setThreadsLatestPost(threads,()=>
                 {
                     threads.sort(function(a,b){
+                        if(!a.pinned&&b.pinned)
+                            return 1;
+                        if(a.pinned&&!b.pinned)
+                            return -1;
                         return b.lastPost.date-a.lastPost.date;
                     });
                     hbsParams.catName=category.name;
@@ -242,7 +290,7 @@ app.get("/category",(req,res)=>
                     hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,15,curPage,"category");
                     res.render("category.hbs",hbsParams);
                 });
-            });
+            });               
         });
     });
 });
@@ -256,4 +304,9 @@ process.on('SIGINT', function() {
   mongoose.connection.close(function () {
     process.exit(0);
   });
+});
+
+app.get("*",(req,res)=>
+{
+    res.render("error_page.hbs");
 });

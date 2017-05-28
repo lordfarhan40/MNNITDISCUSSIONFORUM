@@ -23,15 +23,22 @@
                 {{/if}}
             </div>
             {{{paginate}}}
+            <table style="width:100%">
             {{#each posts}}
-            <div class="well">
-                <h4><strong>{{this.postBy.name}}</strong></h4>
-                {{#dateFormat this.date}}{{/dateFormat}}
-                <hr>
-                <h4>{{this.content}}</h4>
-            </div>
+                <tr style="border-bottom: 1px solid black;background-color: black;color: white;">
+                    <td  class="col-lg-2"><h4><strong>{{this.postBy.name}}</strong></h4></td>
+                    <td  class="col-lg-7">{{#dateFormat this.date}}{{/dateFormat}}</td>
+                    <td  class="col-lg-1">
+                        <a href="/post?_id={{this._id}}" >#{{this.indexNo}}</a>
+                        {{#if ../admin}}
+                            <span class="glyphicon glyphicon-edit" aria-hidden="true">
+                        {{/if}}
+                    </td>
+                </tr>
+                <td><img src="https://www.gravatar.com/avatar/{{this.gravatar}}"/></td>
+                <td style="padding:10px" colspan="3"><h4>{{this.content}}</h4></td>
             {{/each}}
-        </div>
+            </table>
 
         <!--Modal Is-->
         <div class="modal fade" id="myModal" role="dialog">

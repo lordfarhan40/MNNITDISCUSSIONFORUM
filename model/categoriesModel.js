@@ -75,12 +75,6 @@ function deleteCategory(_id,callback){
     });
 }
 
-function resetCount(_id,callback){
-    categoryModule.findOneAndUpdate({_id},{$set:{count:0}},(err,category)=>{
-        callback(err,category);
-    })
-}
-
 module.exports={
     getCategoryById,
     getCategoryByName,
@@ -89,5 +83,4 @@ module.exports={
     editCategory,
     incrementCounter,
     deleteCategory,
-    resetCount
 }
