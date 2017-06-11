@@ -1,14 +1,10 @@
-const userModel=require('./model/userModel.js');
-const hasher=require('./helper/hasher.js');
-const categoriesModel=require('./model/categoriesModel.js');
-const sessionPassport=require('./helper/sessionPassport.js');
-const postModel=require('./model/postModel.js');
-const threadModel=require('./model/threadModel.js');
-const validator=require('./helper/validator.js');
-
-const brand="MNNIT DISCUSSION FORUM";
-
-const error="Occured occured, try contacting admin of the website at mohdfarhanmnnit@gmail.com.";
+const userModel=require('../model/userModel.js');
+const hasher=require('../helper/hasher.js');
+const categoriesModel=require('../model/categoriesModel.js');
+const sessionPassport=require('../helper/sessionPassport.js');
+const postModel=require('../model/postModel.js');
+const threadModel=require('../model/threadModel.js');
+const validator=require('../helper/validator.js');
 
 /////////////////////////////////////////////////////////////
 //       Helpers functions that are local to the file

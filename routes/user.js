@@ -1,9 +1,9 @@
-const validator=require('./helper/validator.js');
-const userModel=require('./model/userModel.js');
-const sessionPassport=require('./helper/sessionPassport.js');
-const categoriesModel=require('./model/categoriesModel.js');
-const threadModel=require('./model/threadModel.js');
-const postModel=require('./model/postModel.js');
+const validator=require('../helper/validator.js');
+const userModel=require('../model/userModel.js');
+const sessionPassport=require('../helper/sessionPassport.js');
+const categoriesModel=require('../model/categoriesModel.js');
+const threadModel=require('../model/threadModel.js');
+const postModel=require('../model/postModel.js');
 
 /////////////////////////////////////////////////////////////
 //       Helpers functions that are local to the file

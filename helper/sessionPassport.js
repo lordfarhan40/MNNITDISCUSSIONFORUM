@@ -17,7 +17,7 @@ function guestSessionPassport(req,res,next){
             }
             if(user.level==1)
                 hbsParams.admin=true;
-            hbsParams.name=user.name;
+            hbsParams.user=user;
             hbsParams.brand=brand;
             return next(req,res,user,hbsParams);
     });
@@ -46,7 +46,7 @@ function adminSessionPassport(req,res,next){
 
         if(user.level==1)
             hbsParams.admin=true;
-        hbsParams.name=user.name;
+        hbsParams.user=user;
         return next(req,res,user,hbsParams);
     });
 }
@@ -71,7 +71,7 @@ function userSessionPassport(req,res,next){
         if(user.level==1)
             hbsParams.admin=true;
         hbsParams.brand=brand;
-        hbsParams.name=user.name;
+        hbsParams.user=user;
         return next(req,res,user,hbsParams);
     });
 }
