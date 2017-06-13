@@ -5,6 +5,7 @@ const sessionPassport=require('../helper/sessionPassport.js');
 const postModel=require('../model/postModel.js');
 const threadModel=require('../model/threadModel.js');
 const validator=require('../helper/validator.js');
+const subscriptionModel=require('../model/subscriptionModel.js');
 
 /////////////////////////////////////////////////////////////
 //       Helpers functions that are local to the file
@@ -40,9 +41,12 @@ function deleteThreadSafely(_id,callback){
         {
             categoriesModel.incrementCounter(thread.threadCategory,-1,(err)=>
             {
-                threadModel.deleteThreadById(_id,(err)=>
+                subscriptionModel.removeSubscriptionsByThread(thread._id,(err)=>
                 {
-                    callback(err);
+                    threadModel.deleteThreadById(_id,(err)=>
+                    {
+                        callback(err);
+                    });
                 });
             });
         });

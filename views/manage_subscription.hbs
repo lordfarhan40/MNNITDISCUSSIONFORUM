@@ -2,5 +2,22 @@
     {{>header}}
     <body>
         {{>nav}}
+        <div class="container">
+            <h3 class="text-center">Manage subscriptions</h3>
+            <table class="table">
+                {{#each subscriptions}}
+                <tr>    
+                    <td>{{this.user.name}}</td>
+                    <td class="text-center">
+                        {{#if this.accepted}}
+                            <a class="btn btn-danger" href="/remove_subscription?userId={{this.user._id}}&threadId={{../threadId}}">Remove</a>
+                        {{else}}
+                            <a class="btn btn-info" href="/accept_subscription?userId={{this.user._id}}&threadId={{../threadId}}">Approve</a>
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </table>
+        </div>
     </body>
 </html>

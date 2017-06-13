@@ -7,6 +7,7 @@ const categoriesModel=require('../model/categoriesModel.js');
 const sessionPassport=require('../helper/sessionPassport.js');
 const threadModel=require('../model/threadModel.js');
 const postModel=require('../model/postModel.js');
+const subscriptionModel=require('../model/subscriptionModel.js');
 
 function setThreadsLatestPost(threads,callback){
     var counter=0;
@@ -184,29 +185,62 @@ app.get("/thread",(req,res)=>
             //get queries from the url
             var curThread=req.query._id;
             var curPage=req.query.page||1;
-            
             threadModel.getThreadById(curThread,(err,thread)=>
             {   
                 if(err||!thread)
-                    return res.render("error_page.hbs",{error});
-                postModel.getPostsByThreadPaginate(thread._id,10,curPage,"postBy",1,(err,posts)=>
+                    return res.redirect("/error");
+
+                subscriptionModel.findSubscription(user?user._id:0,thread._id,(err,subscription)=>
                 {
-                    addIndex(posts,1+(curPage-1)*10);
-                    addGravatarToPosts(posts);
-                    hbsParams._id=thread._id;
-                    hbsParams.paginate=htmlGenerator.generatePagination(curThread,thread.count,10,curPage,"thread");
-                    hbsParams.threadName=thread.subject;
-                    hbsParams.pageTitle=thread.subject;
-                    hbsParams.posts=posts;
-                    if(hbsParams.user)
+
+                    //check status of subscription button
+                    if(!subscription)
                     {
-                        hbsParams.threadAdmin=(hbsParams.user._id.toString()==posts[0].postBy._id.toString());
+                        hbsParams.requestSubs=true;
+                    }else{
+                        if(subscription.accepted)
+                            hbsParams.removeSubs=true;
+                        else
+                            hbsParams.waitSub=true;
                     }
-                    console.log(hbsParams);
-                    res.render("thread.hbs",hbsParams);
+
+                    if(thread.subscriptionModel==3||(subscription&&subscription.accepted==true))
+                    {
+                        hbsParams.allowPost=true;
+                    }
+
+                    if(thread.subscriptionModel==3||thread.subscriptionModel==2||(subscription&&subscription.accepted)){
+                        postModel.getPostsByThreadPaginate(thread._id,10,curPage,"postBy",1,(err,posts)=>
+                        {
+                            addIndex(posts,1+(curPage-1)*10);
+                            addGravatarToPosts(posts);
+                            hbsParams._id=thread._id;
+                            hbsParams.paginate=htmlGenerator.generatePagination(curThread,thread.count,10,curPage,"thread");
+                            hbsParams.threadName=thread.subject;
+                            hbsParams.pageTitle=thread.subject;
+                            hbsParams.posts=posts;
+                            if(user)
+                            {
+                                hbsParams.threadAdmin=(user._id.toString()==posts[0].postBy._id.toString());
+                            }
+                            console.log(hbsParams);
+                            res.render("thread.hbs",hbsParams);
+                        });
+                    }else
+                    {
+                        hbsParams._id=thread._id;
+                        hbsParams.threadName=thread.subject;
+                        hbsParams.pageTitle=thread.subject;
+                        if(user)
+                        {
+                            hbsParams.threadAdmin=(user._id.toString()==thread.threadBy.toString());
+                        }
+                        res.render("thread.hbs",hbsParams);
+                    }
                 });
             });
         });
+
 });
 
 app.get("/category",(req,res)=>

@@ -25,10 +25,10 @@ var schema=mongoose.Schema({
 
 schema.plugin(mongoosePaginate);
 
-const subscriptionModule=mongoose.model("post",schema);
+const subscriptionModule=mongoose.model("subscription",schema);
 
 function findSubscription(user,thread,callback){
-    subscriptionModule.find({user,thread},(err,subscription)=>
+    subscriptionModule.findOne({user,thread},(err,subscription)=>
     {
         return callback(err,subscription);
     });
@@ -37,31 +37,27 @@ function findSubscription(user,thread,callback){
 function addSubscription(user,thread,callback){
     findSubscription(user,thread,(err,subscription)=>
     {
-        if(err||subscription)
-            return callback(1);
+        if(err||subscription){
+            console.log("error here motha");
+            return console.log(err);
+        }
         subscription=new subscriptionModule({
             user,
             thread,
             accepted:false,
             date:new Date()
         });
-        subscription.save((err)=>
+        subscription.save((err,subscription)=>
         {
-            return callback(undefined,err);
+            return callback(err,subscription);
         });
     });
 }
 
 function acceptSubscription(user,thread,callback){
-    subscriptionModule.find({user,thread},(err,subscription)=>
+    subscriptionModule.update({user,thread},{$set:{accepted:true}},(err,subscription)=>
     {
-        if(err||!subscription)
-            return callback(1);
-        subscription.accepted=true;
-        subscription.save(()=>
-        {
-            callback(undefined);
-        });
+        return callback(err,subscription);
     });
 }
 
@@ -79,10 +75,17 @@ function getSubscriptionsByUser(user,callback){
     });
 }
 
-function getSubscriptionsByThread(thread,callback){
-    subscriptionModule.find({thread},(err,subscrptions)=>
+function getSubscriptionsByThread(thread,limit,pageNo,populate,sort,callback){
+    subscriptionModule.paginate({thread},{limit,sort:{date:sort},populate,page:pageNo},(err,result)=>
     {
-        return callback(err,subscriptions);
+        return callback(err,result.docs);
+    });
+}
+
+function removeSubscriptionsByThread(thread,callback){
+    subscriptionModule.remove({thread},(err)=>
+    {
+        callback(err);
     });
 }
 
@@ -93,5 +96,6 @@ module.exports={
     findSubscription,
     removeSubscription,
     getSubscriptionsByThread,
-    getSubscriptionsByUser
+    getSubscriptionsByUser,
+    removeSubscriptionsByThread
 }
