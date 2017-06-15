@@ -1,0 +1,22 @@
+a{
+    color:white;
+    text-decoration: none;
+}
+
+a:hover{
+    color:white;
+    text-decoration: none;
+}
+
+tr.post{
+    margin-bottom: 50px;
+    padding-bottom: 20px
+}
+
+img.img-thumbnail{
+    margin-left:20px
+}
+
+.content,.gravatar{
+    padding:20px
+}

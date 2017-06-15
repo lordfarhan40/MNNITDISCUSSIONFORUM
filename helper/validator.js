@@ -10,12 +10,18 @@ function checkPassword(password){
 function validateDetails(userDetail){
     if(!userDetail.name||!userDetail.password||!userDetail.email)
         return 0;
+    
+    console.log("user details ok");
 
     if(userDetail.name.trim().length==0)
         return 0;
 
-    if(checkPassword(userDetail.password))
+    console.log("name ok");
+
+    if(!checkPassword(userDetail.password))
         return 0;
+    
+    console.log("password ok");
 
     return validateEmail(userDetail.email);
 }
