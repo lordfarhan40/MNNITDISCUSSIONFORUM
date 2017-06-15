@@ -250,8 +250,11 @@ app.get("/pin_thread",(req,res)=>
                 console.log(err);
                 return res.redirect("error found");
             }
-            return res.redirect("/");
-        })
+            threadModel.getThreadById(_id,(err,thread)=>
+            {
+                return res.redirect("http://localhost:3000/category?_id="+thread.threadCategory);
+            });
+        });
     });
 });
 

@@ -9,33 +9,6 @@ const threadModel=require('../model/threadModel.js');
 const postModel=require('../model/postModel.js');
 const subscriptionModel=require('../model/subscriptionModel.js');
 
-function setThreadsLatestPost(threads,callback){
-    var counter=0;
-    if(threads.length==0)
-    {
-        callback(undefined);
-    }
-    for(var i=0;i<threads.length;++i){
-        setThreadLatestPost(threads[i],(err)=>
-        {
-            if(err)
-                return callback(err);
-            ++counter;
-            if(counter==threads.length)
-            {
-                callback(undefined);
-            }
-        });
-    }
-}
-
-function setThreadLatestPost(thread,callback){
-    postModel.getPostsByThread(thread._id,"postBy",-1,(err,posts)=>
-    {
-        thread.lastPost=posts[0];
-        callback(err);
-    });
-}
 
 function addGravatarToPosts(posts){
     for(var i=0;i<posts.length;++i)
@@ -249,30 +222,54 @@ app.get("/category",(req,res)=>
     {
         //get queries from the url
         var curCat=req.query._id;
+        console.log(curCat);
         var curPage=req.query.page||1;
         categoriesModel.getCategoryById(curCat,(err,category)=>{
-            if(err||!category)
-                return res.render("error_page.hbs",{error});
-            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,"threadBy",-1,(err,threads)=>
+            if(err||!category){
+                return res.redirect("/error");
+            }
+            threadModel.getThreadsByCategoryPaginate(curCat,15,curPage,[{path:'threadBy'}, {path:'latestPost', populate: { path: 'postBy' }}],-1,(err,threads)=>
             {
-                setThreadsLatestPost(threads,()=>
-                {
-                    threads.sort(function(a,b){
-                        if(!a.pinned&&b.pinned)
-                            return 1;
-                        if(a.pinned&&!b.pinned)
-                            return -1;
-                        return b.lastPost.date-a.lastPost.date;
-                    });
-                    hbsParams.catName=category.name;
-                    hbsParams.threads=threads;
-                    hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,15,curPage,"category");
-                    res.render("category.hbs",hbsParams);
+                threads.sort(function(a,b){
+                    if(!a.pinned&&b.pinned)
+                        return 1;
+                    if(a.pinned&&!b.pinned)
+                        return -1;
+                    return b.latestPost.date-a.latestPost.date;
                 });
+                hbsParams.catName=category.name;
+                hbsParams.threads=threads;
+                hbsParams.pagination=htmlGenerator.generatePagination(category._id,category.count,15,curPage,"category");
+                res.render("category.hbs",hbsParams);
             });               
         });
     });
 });
+
+app.get("/profile",(req,res)=>
+{
+    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var userId=req.query._id;
+        if(user&&user._id.toString()==userId.toString())
+        {
+            hbsParams.self=true;
+            hbsParams.gravatar=hasher.getmd5(user.email);
+            hbsParams.userName=user.name;
+            res.render("profile.hbs",hbsParams);
+        }else
+        {
+            userModel.getUserById(userId,(err,user)=>
+            {
+                hbsParams.gravatar=hasher.getmd5(user.email);
+                hbsParams.userName=user.name;
+                res.render("profile.hbs",hbsParams);
+            });
+        }
+
+    });
+});
+
 }
 
 module.exports={

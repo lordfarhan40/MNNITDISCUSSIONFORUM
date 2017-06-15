@@ -4,13 +4,13 @@
         <link rel="stylesheet" href="/css/homepage.css"/>
         {{>nav}}
         <div class="container text-center">
-            <h3 class="text-center">Welcome to MNNIT OFFICIAL DISCUSSION FORUM</h3>
+            <h3 class="text-left">Select a category to view the threads:</h3>
             <hr>
             <div>
             {{#each categories}}
             <a href="/category?_id={{this._id}}">
                 <div class="container well">
-                    <h4><strong>{{this.name}}</strong></h4>
+                    <h2><strong>{{this.name}}</strong></h2>
                     {{this.description}}
                 </div>
             </a>

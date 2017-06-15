@@ -35,6 +35,10 @@ var schema=mongoose.Schema({
     date:{
         type:Date,
         required:true,
+    },
+    latestPost:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'post'
     }
 });
 
@@ -103,6 +107,16 @@ function pinThread(_id,callback){
     });
 }
 
+function setLatestPost(threadId,postId,callback){
+    console.log("I get called for ",threadId," to set the postId ",postId);
+    threadModule.findByIdAndUpdate(threadId,{$set:{latestPost:postId}},(err,thread)=>
+    {
+        console.log(err);
+        console.log(thread);
+        callback(err,thread);
+    });
+}
+
 module.exports={
     pinThread,
     getThreadById,
@@ -111,4 +125,5 @@ module.exports={
     deleteThreadById,
     incrementCounter,
     getThreadsByCategoryPaginate,
+    setLatestPost
 }

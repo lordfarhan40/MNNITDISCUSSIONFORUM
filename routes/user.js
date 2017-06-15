@@ -5,6 +5,7 @@ const categoriesModel=require('../model/categoriesModel.js');
 const threadModel=require('../model/threadModel.js');
 const postModel=require('../model/postModel.js');
 const subscriptionModel=require('../model/subscriptionModel.js');
+const hasher=require('../helper/hasher.js');
 /////////////////////////////////////////////////////////////
 //       Helpers functions that are local to the file
 /////////////////////////////////////////////////////////////
@@ -13,7 +14,9 @@ function createNewPost(content,postBy,postThread,callback){
     postModel.addPost(content,postBy,postThread,(err,post)=>
     {
         threadModel.incrementCounter(postThread,1,()=>{
-            callback(post);
+            threadModel.setLatestPost(postThread,post._id,(err,post)=>{
+                callback(post);
+            });
         });
     });
 }
@@ -165,7 +168,6 @@ app.get("/remove_subscription",(req,res)=>
         });
     });
 });
-
 }
 
 module.exports={

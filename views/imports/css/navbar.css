@@ -1,0 +1,35 @@
+#NavigationBarBrand{
+    background: #3498db;
+    color:white;
+}
+
+#NavigationBar{
+    background: #2980b9;
+    color:white;
+}
+
+.navbar-default .navbar-nav>li>a{
+    transition:background 0.3s;
+    color: #ecf0f1;
+}
+
+
+
+.navbar-default .navbar-nav>li>a:focus{
+    background:#3498db;
+    color: white;
+}
+
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover,.navbar-default .navbar-nav>li>a:hover{
+     background:#3498db;
+    color: white;
+}
+
+.navbar-default .navbar-toggle .icon-bar{
+    background-color: white;
+}
+
+.navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover{
+    background-color: #3498db;
+}
+

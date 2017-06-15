@@ -1,0 +1,24 @@
+
+.panel-default a{
+    color:
+    text-decoration: none;
+}
+
+
+.panel-default a:hover{
+    text-decoration: none;
+}
+
+
+
+td{
+    padding:10px
+}
+
+tr{
+    transition: background 0.4s
+}
+
+tr:hover{
+    background: #E4F1FE;
+}

@@ -2,10 +2,14 @@
     text-decoration: none;
 }
 
-a div{
-    transition: background 1s;
+a div.well{
+    color:#22313F;
+    transition: background 0.5s;
+    background: #A2DED0;
+    overflow:hidden;
 }
 
 a div:hover{
-    background: #bdc3c7;
+    color:white;
+    background: #3498db;
 }
