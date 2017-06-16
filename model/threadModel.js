@@ -111,8 +111,6 @@ function setLatestPost(threadId,postId,callback){
     console.log("I get called for ",threadId," to set the postId ",postId);
     threadModule.findByIdAndUpdate(threadId,{$set:{latestPost:postId}},(err,thread)=>
     {
-        console.log(err);
-        console.log(thread);
         callback(err,thread);
     });
 }

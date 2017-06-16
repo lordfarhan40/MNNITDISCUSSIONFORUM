@@ -174,7 +174,7 @@ app.get("/thread",(req,res)=>
                         if(subscription.accepted)
                             hbsParams.removeSubs=true;
                         else
-                            hbsParams.waitSub=true;
+                            hbsParams.waitSubs=true;
                     }
 
                     if(thread.subscriptionModel==3||(subscription&&subscription.accepted==true))
@@ -194,9 +194,8 @@ app.get("/thread",(req,res)=>
                             hbsParams.posts=posts;
                             if(user)
                             {
-                                hbsParams.threadAdmin=(user._id.toString()==posts[0].postBy._id.toString());
+                                hbsParams.threadAdmin=(user._id.toString()==thread.threadBy.toString());
                             }
-                            console.log(hbsParams);
                             res.render("thread.hbs",hbsParams);
                         });
                     }else
@@ -222,7 +221,6 @@ app.get("/category",(req,res)=>
     {
         //get queries from the url
         var curCat=req.query._id;
-        console.log(curCat);
         var curPage=req.query.page||1;
         categoriesModel.getCategoryById(curCat,(err,category)=>{
             if(err||!category){

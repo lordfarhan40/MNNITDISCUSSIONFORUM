@@ -86,9 +86,23 @@ app.post("/post_reply",(req,res)=>
 {
     sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
-        createNewPost(req.body.content,user._id,req.body._id,(err,post)=>
+        var threadId=req.body._id;
+        console.log(threadId);
+        threadModel.getThreadById(threadId,(err,thread)=>
         {
-            res.redirect("/thread?_id="+req.body._id);
+            subscriptionModel.findSubscription(user._id,threadId,(err,subscription)=>
+            {
+                if(thread.subscription==3||(subscription&&subscription.accepted==1))
+                {
+                    createNewPost(req.body.content,user._id,req.body._id,(err,post)=>
+                    {
+                        res.redirect("/thread?_id="+req.body._id);
+                    });
+                }else
+                {
+                    res.redirect("/error");
+                }
+            });
         });
     });
 });
@@ -127,6 +141,7 @@ app.get("/manage_subscriptions",(req,res)=>
                 subscriptions.shift();
                 hbsParams.subscriptions=subscriptions;
                 hbsParams.threadId=thread._id;
+                console.log(hbsParams);
                 res.render("manage_subscription",hbsParams);
             });
         });
@@ -139,13 +154,14 @@ app.get("/accept_subscription",(req,res)=>
     {
         var threadId=req.query.threadId;
         var userId=req.query.userId;
+        var redirect=req.query.redirect;
         threadModel.getThreadById(threadId,(err,thread)=>
         {
             if(user._id.toString()!=thread.threadBy.toString())
                 return res.send("dont even try");
             subscriptionModel.acceptSubscription(userId,threadId,(err,thread)=>
             {
-                res.redirect("/");
+                res.redirect("/"+redirect);
             });
         });
     });
@@ -156,14 +172,15 @@ app.get("/remove_subscription",(req,res)=>
     sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
         var threadId=req.query.threadId;
-        var userId=req.query.userId;
+        var userId=req.query.userId||user._id;
+        var redirect=req.query.redirect;
         threadModel.getThreadById(threadId,(err,thread)=>
         {
-            if(user._id.toString()!=thread.threadBy.toString())
+            if(user._id.toString()!=thread.threadBy.toString()&&userId.toString()!=user._id.toString())
                 return res.send("dont even try");
             subscriptionModel.removeSubscription(userId,threadId,(err)=>
             {
-                res.redirect("/");
+                res.redirect("/"+redirect);
             });
         });
     });

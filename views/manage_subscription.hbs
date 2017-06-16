@@ -16,8 +16,17 @@
                         {{/if}}
                     </td>
                 </tr>
+                {{else}}
+                    <tr>
+                        <td class="text-center">
+                            Sorry but there are no more active subscribers or subscription request for your thread.
+                        </td>
+                    </tr>
                 {{/each}}
             </table>
         </div>
     </body>
+    <script>
+        $(".btn").attr("href",$(".btn").attr("href")+"&redirect="+(location.pathname+location.search).substr(1));
+    </script>
 </html>
