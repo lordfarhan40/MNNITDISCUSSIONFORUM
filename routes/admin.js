@@ -165,10 +165,13 @@ app.get("/empty_category",(req,res)=>{
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>{
         emptyCategory(req.query._id,(err)=>
         {
+            categoriesModel.resetCounter(req.query._id,(err,category)=>
+            {
                 if(err){
                     return res.render("error_page.hbs",{error});
                 }
                 return res.redirect("/manage_categories?message=2");
+            });
         });
     });
 });

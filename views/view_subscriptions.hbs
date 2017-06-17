@@ -1,0 +1,52 @@
+<html>
+    {{>header}}
+    <link rel="stylesheet" href="/css/category.css">
+    <body>
+        {{>nav}}
+        <h2 class="text-center" style="margin-top:50px;margin-bottom:50px"><strong>Your subscriptions</strong></h2>
+        <div class="row">
+            <div class="col-lg-offset-1 col-lg-10 col-md-10 col-md-offset-1 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <table class="table">
+                        <col width="60%">
+                        <col width="40%">
+                        {{#each subscriptions}}
+                        <tr>
+                            <div class="row">
+                                <td>
+                                    <a href='/thread?_id={{this.thread._id}}' style="font-size: 23px">
+                                        {{this.thread.subject}}
+                                    </a>
+                                    <br>
+                                    <strong>Thread by:</strong> <a href="/profile?_id={{this.thread.threadBy._id}}">{{this.thread.threadBy.name}}</a>
+                                </td>
+                                <td><strong>Replies: </strong>{{this.thread.count}}<br><strong>Last updated:</strong> {{#dateFormat this.thread.latestPost.date}}{{/dateFormat}}</td>
+                                <td>
+                                    {{#ifCond ../userId '!=' this.thread.threadBy._id}}
+                                    {{#if this.accepted}}
+                                        <div>
+                                            <a style="margin-top:10px" class="subs-button btn btn-danger btn-block" href="/remove_subscription?threadId={{this.thread._id}}">Unsubscribe</a>
+                                        </div> 
+                                    {{else}}
+                                        <div>
+                                            <a style="margin-top:10px" class="subs-button btn btn-danger btn-block" href="/remove_subscription?threadId={{this.thread._id}}">Remove request</a>
+                                        </div> 
+                                    {{/if}}
+                                    {{/ifCond}}
+                                </td>
+                            </div>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td class="text-center">Sorry, seems you have not subscribed to any thread.</td>
+                        </tr>
+                        {{/each}}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        $(".subs-button").attr("href",$(".btn").attr("href")+"&redirect="+(location.pathname+location.search).substr(1));
+    </script>
+</html>

@@ -141,6 +141,7 @@ app.get("/manage_subscriptions",(req,res)=>
                 subscriptions.shift();
                 hbsParams.subscriptions=subscriptions;
                 hbsParams.threadId=thread._id;
+                console.log(hbsParams.user);
                 console.log(hbsParams);
                 res.render("manage_subscription",hbsParams);
             });
@@ -178,6 +179,9 @@ app.get("/remove_subscription",(req,res)=>
         {
             if(user._id.toString()!=thread.threadBy.toString()&&userId.toString()!=user._id.toString())
                 return res.send("dont even try");
+            
+            if(user._id.toString()==thread.threadBy.toString()||userId.toString()==user._id.toString())
+                return res.send("dont even try");
             subscriptionModel.removeSubscription(userId,threadId,(err)=>
             {
                 res.redirect("/"+redirect);
@@ -188,22 +192,28 @@ app.get("/remove_subscription",(req,res)=>
 
 app.get("/manage_account",(req,res)=>
 {
-    sessionPassport.userSessionPassport(req,res,(req,res,curUser,hbsParams)=>
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
-        var userId=req.query._id;
-        console.log(userId);
-        userModel.getUserById(userId,(err,user)=>
-        {
-            if(user._id.toString()!=curUser._id.toString())
-            {
-                return res.redirect("/error");
-            }
-            hbsParams.user=user;
-            res.render("manage_account",hbsParams);
-        });
+        hbsParams.user=user;
+        res.render("manage_account",hbsParams);
     });
 });
 
+app.get("/view_subscriptions",(req,res)=>
+{
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        subscriptionModel.getSubscriptionsByUser(user._id,20,1,{path:'thread', populate: { path: 'threadBy latestPost' }},1,(err,subscriptions)=>
+        {
+            console.log(subscriptions);
+            subscriptions.sort(function(a,b){
+                return b.thread.latestPost.date-a.thread.latestPost.date;
+            });
+            hbsParams.subscriptions=subscriptions;
+            res.render("view_subscriptions.hbs",hbsParams);
+        });
+    });
+});
 
 }
 

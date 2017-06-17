@@ -68,10 +68,10 @@ function removeSubscription(user,thread,callback){
     });
 }
 
-function getSubscriptionsByUser(user,callback){
-    subscriptionModule.find({user},(err,subscriptions)=>
+function getSubscriptionsByUser(user,limit,pageNo,populate,sort,callback){
+    subscriptionModule.paginate({user},{limit,sort:{date:sort},populate,page:pageNo},(err,result)=>
     {
-        return callback(err,subscription);
+        return callback(err,result.docs);
     });
 }
 
