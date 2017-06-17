@@ -2,7 +2,21 @@
     {{>header}}
     <body>
         {{>nav}}
-        <h2>{{userName}}</h2>
-        <img src="https://www.gravatar.com/avatar/{{gravatar}}">
+        <div class="container">
+            <h1 class="text-center"><strong>{{user.name}}</strong></h1>
+            <div class="container text-center" style="margin-top:50px">
+                <img class="img-responsive img-thumbnail" src="https://www.gravatar.com/avatar/{{gravatar}}?s=250">
+            </div>
+            <div class="text-center">
+                <h2>Email:{{user.email}}</h2>
+                <h2>Joined on {{#dateFormat user.date}}{{/dateFormat}}</h2>
+            </div>
+            <div class="container text-center" style="margin-top: 20px">
+                <a class="btn btn-info" href="#">View posts by {{user.name}}</a>&nbsp;&nbsp;&nbsp;<a class="btn btn-info" href="#">View threads by {{user.name}}</a>
+                {{#if self}}
+                <br><a class="btn btn-info" style="margin-top: 20px" href="/manage_account?_id={{user._id}}">Manage Account</a>
+                {{/if}}
+            </div>
+        </div>
     </body>
 </html>

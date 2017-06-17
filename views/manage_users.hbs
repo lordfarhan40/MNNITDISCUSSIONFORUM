@@ -16,13 +16,13 @@
                 </tr>
                 {{#each users}}
                 <tr>
-                    <td>{{this.name}}</td>
+                    <td><a href="/profile?_id={{this._id}}">{{this.name}}</a></td>
                     <td>{{this.email}}</td>
                     <td>
                         {{#if this.level}}
                             Admin
                         {{else}}
-                            Make admin
+                            Normal User
                         {{/if}}
                     </td>
                     <td><a class="btn btn-info" href="#" onclick="openModal('{{this._id}}');">Change Password</a></td>

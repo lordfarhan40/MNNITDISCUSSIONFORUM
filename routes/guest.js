@@ -162,7 +162,10 @@ app.get("/thread",(req,res)=>
             {   
                 if(err||!thread)
                     return res.redirect("/error");
-
+                hbsParams._id=thread._id;
+                hbsParams.threadName=thread.subject;
+                hbsParams.pageTitle=thread.subject;
+                hbsParams.threadAdmin=thread.threadBy;
                 subscriptionModel.findSubscription(user?user._id:0,thread._id,(err,subscription)=>
                 {
 
@@ -187,26 +190,16 @@ app.get("/thread",(req,res)=>
                         {
                             addIndex(posts,1+(curPage-1)*10);
                             addGravatarToPosts(posts);
-                            hbsParams._id=thread._id;
                             hbsParams.paginate=htmlGenerator.generatePagination(curThread,thread.count,10,curPage,"thread");
-                            hbsParams.threadName=thread.subject;
-                            hbsParams.pageTitle=thread.subject;
                             hbsParams.posts=posts;
-                            if(user)
-                            {
-                                hbsParams.threadAdmin=(user._id.toString()==thread.threadBy.toString());
-                            }
+                            // if(user)
+                            // {
+                            //     hbsParams.threadAdmin=(user._id.toString()==thread.threadBy.toString());
+                            // }
                             res.render("thread.hbs",hbsParams);
                         });
                     }else
                     {
-                        hbsParams._id=thread._id;
-                        hbsParams.threadName=thread.subject;
-                        hbsParams.pageTitle=thread.subject;
-                        if(user)
-                        {
-                            hbsParams.threadAdmin=(user._id.toString()==thread.threadBy.toString());
-                        }
                         res.render("thread.hbs",hbsParams);
                     }
                 });
@@ -253,14 +246,14 @@ app.get("/profile",(req,res)=>
         {
             hbsParams.self=true;
             hbsParams.gravatar=hasher.getmd5(user.email);
-            hbsParams.userName=user.name;
+            hbsParams.user=user;
             res.render("profile.hbs",hbsParams);
         }else
         {
             userModel.getUserById(userId,(err,user)=>
             {
                 hbsParams.gravatar=hasher.getmd5(user.email);
-                hbsParams.userName=user.name;
+                hbsParams.user=user;
                 res.render("profile.hbs",hbsParams);
             });
         }

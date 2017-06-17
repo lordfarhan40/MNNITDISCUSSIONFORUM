@@ -92,7 +92,7 @@ app.post("/post_reply",(req,res)=>
         {
             subscriptionModel.findSubscription(user._id,threadId,(err,subscription)=>
             {
-                if(thread.subscription==3||(subscription&&subscription.accepted==1))
+                if(thread.subscriptionModel==3||(subscription&&subscription.accepted==1))
                 {
                     createNewPost(req.body.content,user._id,req.body._id,(err,post)=>
                     {
@@ -185,6 +185,26 @@ app.get("/remove_subscription",(req,res)=>
         });
     });
 });
+
+app.get("/manage_account",(req,res)=>
+{
+    sessionPassport.userSessionPassport(req,res,(req,res,curUser,hbsParams)=>
+    {
+        var userId=req.query._id;
+        console.log(userId);
+        userModel.getUserById(userId,(err,user)=>
+        {
+            if(user._id.toString()!=curUser._id.toString())
+            {
+                return res.redirect("/error");
+            }
+            hbsParams.user=user;
+            res.render("manage_account",hbsParams);
+        });
+    });
+});
+
+
 }
 
 module.exports={

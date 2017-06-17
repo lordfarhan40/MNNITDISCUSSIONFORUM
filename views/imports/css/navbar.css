@@ -33,3 +33,17 @@
     background-color: #3498db;
 }
 
+@media (max-width: 767px){
+    .navbar-default .navbar-nav .open .dropdown-menu>li>a{
+    background-color: white;
+    color: black;
+    }
+    .navbar-default .navbar-nav .open .dropdown-menu>li>a:hover{
+    background-color: #3498db;
+    color: white;
+    }
+    .dropdown-menu .divider{
+        margin: 0px;
+    }
+
+}

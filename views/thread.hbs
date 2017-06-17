@@ -9,7 +9,7 @@
                     <h2><strong>{{threadName}}</strong><h2>
                 </div>
                 {{#if name}}
-                    {{#if threadAdmin}}
+                    {{#ifCond threadAdmin '==' userId}}
                     <div class="col-lg-2 col-md-2">
                         <a style="margin-top:15px" class="btn btn-info btn-block" href="/manage_subscriptions?_id={{_id}}">Manage Subscriptions</a>
                     </div>                
@@ -29,7 +29,7 @@
                             <a style="margin-top:15px" class="subs-button btn btn-danger btn-block" href="/remove_subscription?threadId={{_id}}">Remove request</a>
                         </div> 
                         {{/if}}
-                    {{/if}}
+                    {{/ifCond}}
                     {{#if allowPost}}
                     <div class="col-lg-2 col-md-2">
                         <a style="margin-top:15px" class="btn btn-info btn-block" href="#" data-toggle="modal" data-target="#myModal">Post Reply</a>
@@ -41,15 +41,29 @@
             <table style="width:100%">
             {{#each posts}}
                 <tr class="post" style="border-bottom: 1px solid black;background-color: #2c3e50;color: white;">
-                    <td  class="col-lg-2"><h4><strong><a href="/profile?_id={{this.postBy._id}}">{{this.postBy.name}}</strong></h4></td>
-                    <td  class="col-lg-7">{{#dateFormat this.date}}{{/dateFormat}}</td>
-                    <td  class="col-lg-1">
-                        <a href="/post?_id={{this._id}}" >#{{this.indexNo}}</a>
+                    <td class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                            <h4><strong>
+                                <a href="/profile?_id={{this.postBy._id}}">{{this.postBy.name}}{{#ifCond ../threadAdmin '==' this.postBy._id}}&nbsp;[OP]{{/ifCond}}
+                            </strong></h4>
+                        </div>
+                        <div  class="col-lg-8 col-md-8 col-sm-8 col-xs-8" style="  line-height: 40px;vertical-align: middle;">{{#dateFormat this.date}}{{/dateFormat}}</div>
+                        <div  class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="  line-height: 40px;vertical-align: middle;">
+                            <a href="/post?_id={{this._id}}" >#{{this.indexNo}}</a>
+                        </div>
+                    </div>
                     </td>
                 </tr>
                 <tr style="background: #ECECEC;border-bottom: 10px solid white">
-                <td class="gravatar"><img class="img-thumbnail" src="https://www.gravatar.com/avatar/{{this.gravatar}}"/></td>
-                <td class="content" style="padding:10px" colspan="3"><h4>{{this.content}}</h4></td>
+                    <td>
+                        <div class="gravatar text-center col-lg-2 col-md-2 col-sm-2 col-xs-2"><img class="img-thumbnail" src="https://www.gravatar.com/avatar/{{this.gravatar}}"/>
+                            {{#if this.postBy.level}}
+                                Admin
+                            {{/if}}
+                        </div>
+                        <div class="content col-lg-10 col-md-10 col-sm-10 col-xs-10" style="padding:10px" colspan="3"><h4>{{this.content}}</h4></div>
+                    </td>
                 </tr>
             {{else}}
                 <tr>
