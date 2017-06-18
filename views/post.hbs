@@ -2,7 +2,17 @@
     {{>header}}
     <body>
         {{>nav}}
-        {{curPost.postThread.subject}}
-        {{curPost.postBy.name}}
+        <div class="row">
+            <div class="text-center col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3>Go to thread: <a href="/thread?_id={{curPost.postThread._id}}">{{curPost.postThread.subject}}</a></h3>
+                <h3>Post by: <a href="/profile?_id={{curPost.postBy._id}}">{{curPost.postBy.name}}</a> on {{#dateFormat curPost.postBy.date}}{{/dateFormat}}
+                </h3>
+                <div class="well col-lg-6 col-md-6 col-lg-offset-3 col-md-offset-3">
+                    <h4>
+                    {{curPost.content}}
+                    </h4>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

@@ -180,7 +180,7 @@ app.get("/remove_subscription",(req,res)=>
             if(user._id.toString()!=thread.threadBy.toString()&&userId.toString()!=user._id.toString())
                 return res.send("dont even try");
             
-            if(user._id.toString()==thread.threadBy.toString()||userId.toString()==user._id.toString())
+            if(user._id.toString()==thread.threadBy.toString()&&userId.toString()==user._id.toString())
                 return res.send("dont even try");
             subscriptionModel.removeSubscription(userId,threadId,(err)=>
             {
