@@ -207,7 +207,7 @@ app.get("/ban_user",(req,res)=>
     });
 });
 
-app.post("/change_password",(req,res)=>
+app.post("/change_password_admin",(req,res)=>
 {
     sessionPassport.adminSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
@@ -222,7 +222,6 @@ app.post("/change_password",(req,res)=>
                 });
             });
         }
-        
     });
 });
 

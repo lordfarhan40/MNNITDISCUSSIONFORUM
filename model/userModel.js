@@ -75,6 +75,13 @@ function changePasswordById(_id,password,callback){
     });
 } 
 
+function changeDetails(_id,name,email,callback){
+    userModule.findByIdAndUpdate({_id},{$set:{name,email}},(err,user)=>
+    {
+        callback(err,user);
+    });
+}
+
 const addNewUser=(userDetails,callback)=>{
             var newUser=new userModule({
                 email:userDetails.email,
@@ -97,7 +104,8 @@ module.exports={
     addNewUser,
     getUsers,
     flipBanById,
-    changePasswordById
+    changePasswordById,
+    changeDetails
 };
 
 

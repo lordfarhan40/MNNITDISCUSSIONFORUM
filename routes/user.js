@@ -194,6 +194,7 @@ app.get("/manage_account",(req,res)=>
 {
     sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
     {
+        hbsParams.error=req.query.error;
         hbsParams.user=user;
         res.render("manage_account",hbsParams);
     });
@@ -211,6 +212,43 @@ app.get("/view_subscriptions",(req,res)=>
             });
             hbsParams.subscriptions=subscriptions;
             res.render("view_subscriptions.hbs",hbsParams);
+        });
+    });
+});
+
+app.post("/change_password",(req,res)=>
+{
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var newPassword=req.body.newPassword;
+        var oldPassword=req.body.oldPassword;
+        hasher.compare(oldPassword,user.password,(err,match)=>
+        {
+            if(match){
+                hasher.generateHash(newPassword,(err,hash)=>
+                {
+                    userModel.changePasswordById(user._id,hash,(err)=>
+                    {
+                        res.redirect("/manage_account");
+                    });
+                });
+            }else
+            {
+                res.redirect("/manage_account?error=1")
+            }
+        });
+    });
+});
+
+app.post("/change_details",(req,res)=>
+{
+    sessionPassport.userSessionPassport(req,res,(req,res,user,hbsParams)=>
+    {
+        var newName=req.body.name;
+        var newEmail=req.body.email;
+        userModel.changeDetails(user._id,newName,newEmail,(err,user)=>
+        {
+            res.redirect("/manage_account");
         });
     });
 });

@@ -239,25 +239,16 @@ app.get("/category",(req,res)=>
 
 app.get("/profile",(req,res)=>
 {
-    sessionPassport.guestSessionPassport(req,res,(req,res,user,hbsParams)=>
+    sessionPassport.guestSessionPassport(req,res,(req,res,curUser,hbsParams)=>
     {
         var userId=req.query._id;
-        if(user&&user._id.toString()==userId.toString())
+        userModel.getUserById(userId,(err,user)=>
         {
-            hbsParams.self=true;
+            hbsParams.self=(user._id.toString()==curUser._id.toString());
             hbsParams.gravatar=hasher.getmd5(user.email);
             hbsParams.user=user;
-            res.render("profile.hbs",hbsParams);
-        }else
-        {
-            userModel.getUserById(userId,(err,user)=>
-            {
-                hbsParams.gravatar=hasher.getmd5(user.email);
-                hbsParams.user=user;
-                res.render("profile.hbs",hbsParams);
-            });
-        }
-
+            res.render("profile.hbs",hbsParams);            
+        });
     });
 });
 

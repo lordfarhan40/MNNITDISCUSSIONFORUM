@@ -6,23 +6,34 @@
             <h3 class="text-center">
                 Manage Account
             </h3>
-            <div class="input-group" style="margin-top:20px">
-                <span class="input-group-addon" id="basic-addon1" style="margin-top:20px">Name</span>
-                <input type="text" class="form-control" placeholder="Enter your name" value="{{user.name}}">
-            </div>
-            <div class="input-group" style="margin-top:20px">
-                <span class="input-group-addon" id="basic-addon1">Email</span>
-                <input type="email" class="form-control" placeholder="Username" aria-describedby="basic-addon1" value="{{user.email}}">
-            </div>
-            <a class="btn btn-info btn-block" href="#" style="margin-top:20px">Save Info</a>
+            <form id="change_details" method="POST" action="/change_details">
+                <div class="input-group" style="margin-top:20px">
+                    <span class="input-group-addon" id="basic-addon1" style="margin-top:20px">Name</span>
+                    <input name="name" type="text" class="form-control" placeholder="Enter your name" value="{{user.name}}" required>
+                </div>
+                <div class="input-group" style="margin-top:20px">
+                    <span class="input-group-addon" id="basic-addon1">Email</span>
+                    <input name="email" type="email" class="form-control" placeholder="Username" aria-describedby="basic-addon1" value="{{user.email}}" required>
+                </div>
+                <button class="btn btn-info btn-block" style="margin-top:20px">Save Info</button>
+                <hr>
+            </form>
+            {{#if error}}
+                <div class="alert alert-danger alert-dismissable">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Error!</strong> Password entered does not match!
+                </div>
+            {{/if}}
             <h3 class="text-center">Change password</h3>
-            <div class="input-group" style="margin-top:20px;width:100%">
-                <input type="password" class="form-control" placeholder="Old password" aria-describedby="basic-addon1">
-            </div>
-            <div class="input-group" style="margin-top:20px;width:100%">
-                <input type="password" class="form-control" placeholder="New password (Min 8 characters)" aria-describedby="basic-addon1">
-            </div>
-            <a class="btn btn-info btn-block" href="#" style="margin-top:20px">Chane password</a>
+            <form id="change_password" method="POST" action="/change_password">
+                <div class="input-group" style="margin-top:20px;width:100%">
+                    <input pattern=".{8,}" type="password" class="form-control" placeholder="Old password" name="oldPassword" required>
+                </div>
+                <div class="input-group" style="margin-top:20px;width:100%">
+                    <input pattern=".{8,}" type="password" class="form-control" placeholder="New password (Min 8 characters)" name="newPassword" required>
+                </div>
+                <button class="btn btn-info btn-block" style="margin-top:20px">Change password</button>
+            </form>
         </div>
     </body>
 </html>
